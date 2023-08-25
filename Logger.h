@@ -16,11 +16,11 @@ typedef enum {
 
 #include <sstream>
 
-#define LOG_E() Logger(LOG_LEVEL_ERROR, "", __LINE__)
-#define LOG_W() Logger(LOG_LEVEL_WARNING, "", __LINE__)
-#define LOG_I() Logger(LOG_LEVEL_INFO, "", __LINE__)
-#define LOG_D() Logger(LOG_LEVEL_DEBUG, "", __LINE__)
-#define LOG_V() Logger(LOG_LEVEL_VERBOSE, "", __LINE__)
+#define LOG_E() Logger(LOG_LEVEL_ERROR, __FILENAME__, __LINE__)
+#define LOG_W() Logger(LOG_LEVEL_WARNING, __FILENAME__, __LINE__)
+#define LOG_I() Logger(LOG_LEVEL_INFO, __FILENAME__, __LINE__)
+#define LOG_D() Logger(LOG_LEVEL_DEBUG, __FILENAME__, __LINE__)
+#define LOG_V() Logger(LOG_LEVEL_VERBOSE, __FILENAME__, __LINE__)
 
 class Logger {
  public:
