@@ -81,6 +81,7 @@ void get_datetime(char* buffer, size_t buffer_len) {
 const char* getFileName(const char* path) {
   const char* lastSeparator = strrchr(path, '/');
   const char* fileName = (lastSeparator != NULL) ? lastSeparator + 1 : path;
+  return fileName;
 }
 
 #ifdef __cplusplus
