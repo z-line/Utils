@@ -92,10 +92,15 @@ Logger::Logger(unsigned int level, const char* filename, const int line)
 Logger::~Logger() {
   static std::mutex mutex;
   std::lock_guard<std::mutex> lock(mutex);
+  if (m_level == LOG_LEVEL_NONE) {
+    return;
+  }
   char time_str[64];
   get_datetime(time_str, sizeof(time_str));
-  std::cout << " - [" << time_str << "] - " << m_filename << ":" << m_line
-            << " - " << m_log_output.str() << std::endl;
+  std::cout << colorful_map[m_level] << "[" << time_str << "]"
+            << LOG_CTRL_RESET;
+  std::cout << " - " << m_filename << ":" << m_line << " - "
+            << m_log_output.str() << std::endl;
 }
 
 // template <typename T>

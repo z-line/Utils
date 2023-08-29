@@ -28,10 +28,11 @@ class Logger {
   ~Logger();
 
   template <typename T>
-  Logger& operator<<(const T& input){
-      m_log_output << input;
-      return (*this);
+  Logger& operator<<(const T& input) {
+    m_log_output << input;
+    return (*this);
   }
+
   Logger& operator<<(bool input);
 
  private:
@@ -53,10 +54,8 @@ class Logger {
 #define LOG_V(b, ...) \
   my_log(LOG_LEVEL_VERBOSE, __FILE__, __LINE__, b, ##__VA_ARGS__)
 
-extern "C" {
 void my_log(LogLevel_TypeDef log_level, const char* const tag, const int line,
             const char* format, ...);
-}
 #endif
 
 #ifdef __cplusplus
