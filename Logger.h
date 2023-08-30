@@ -14,6 +14,7 @@ typedef enum {
 
 #ifdef __cplusplus
 
+#include "base_type.h"
 #include <sstream>
 
 #define LOG_E() Logger(LOG_LEVEL_ERROR, __FILENAME__, __LINE__)
@@ -30,6 +31,11 @@ class Logger {
   template <typename T>
   Logger& operator<<(const T& input) {
     m_log_output << input;
+    return (*this);
+  }
+
+  Logger& operator<<(u8 input) {
+    m_log_output << static_cast<int>(input);
     return (*this);
   }
 
