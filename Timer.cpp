@@ -9,7 +9,9 @@ Timer::Timer(bool start_immediate, std::function<void(void)> handle,
   }
 }
 
-Timer::~Timer() {}
+Timer::~Timer() {
+    stop();
+}
 
 void Timer::start() {
   if (!m_started) {
@@ -24,7 +26,7 @@ void Timer::stop() {
 }
 
 void Timer::process() {
-  while (m_force_stop) {
+  while (!m_force_stop) {
     std::unique_lock<std::mutex> lock(m_mutex);
     m_started = true;
     m_handle();

@@ -1,5 +1,5 @@
-#ifndef __BASE_TYPES_H
-#define __BASE_TYPES_H
+#ifndef __BaseTypeS_H
+#define __BaseTypeS_H
 
 #include "stdint.h"
 

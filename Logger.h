@@ -14,7 +14,7 @@ typedef enum {
 
 #ifdef __cplusplus
 
-#include "base_type.h"
+#include "BaseType.h"
 #include <sstream>
 
 #define LOG_E() Logger(LOG_LEVEL_ERROR, __FILENAME__, __LINE__)
