@@ -86,13 +86,13 @@ const char* getFileName(const char* path) {
 
 #ifdef __cplusplus
 
-Logger::Logger(unsigned int level, const char* filename, const int line)
+Logger::Logger(LogLevel_TypeDef level, const char* filename, const int line)
     : m_log_output(), m_level(level), m_filename(filename), m_line(line) {}
 
 Logger::~Logger() {
   static std::mutex mutex;
   std::lock_guard<std::mutex> lock(mutex);
-  if (m_level == LOG_LEVEL_NONE) {
+  if (m_level > m_log_level) {
     return;
   }
   char time_str[64];

@@ -25,7 +25,7 @@ typedef enum {
 
 class Logger {
  public:
-  Logger(unsigned int level, const char* filename, const int line);
+  Logger(LogLevel_TypeDef level, const char* filename, const int line);
   ~Logger();
 
   template <typename T>
@@ -43,7 +43,7 @@ class Logger {
 
  private:
   std::stringstream m_log_output;
-  unsigned int m_level;
+  LogLevel_TypeDef m_level;
   const char* m_filename;
   const int m_line;
 };
