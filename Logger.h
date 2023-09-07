@@ -16,6 +16,7 @@ typedef enum {
 
 #include "BaseType.h"
 #include <sstream>
+#include <cstdio>
 
 #define LOG_E() Logger(LOG_LEVEL_ERROR, __FILENAME__, __LINE__)
 #define LOG_W() Logger(LOG_LEVEL_WARNING, __FILENAME__, __LINE__)
@@ -68,6 +69,7 @@ void my_log(LogLevel_TypeDef log_level, const char* const tag, const int line,
 extern "C" {
 #endif
 const char* getFileName(const char* path);
+void log_hex(u8* data,size_t len);
 #ifdef __cplusplus
 }
 #endif
