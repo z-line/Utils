@@ -6,6 +6,7 @@
 #include <Logger.h>
 #include <cstdlib>
 #include <cstring>
+#include <cstddef>
 
 #include "unistd.h"
 #include "arpa/inet.h"
