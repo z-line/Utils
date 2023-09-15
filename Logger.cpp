@@ -85,7 +85,7 @@ const char* getFileName(const char* path) {
 }
 
 void log_hex(u8* data, size_t len) {
-  for (int i = 0; i < len; i++) {
+  for (size_t i = 0; i < len; i++) {
     printf("%02x ", data[i]);
     if (i >= len - 1) {
       printf("\n");
