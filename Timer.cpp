@@ -1,4 +1,5 @@
 #include "Timer.h"
+
 #include <chrono>
 
 Timer::Timer(bool start_immediate, std::function<void(void)> handle,
@@ -9,9 +10,7 @@ Timer::Timer(bool start_immediate, std::function<void(void)> handle,
   }
 }
 
-Timer::~Timer() {
-    stop();
-}
+Timer::~Timer() { stop(); }
 
 void Timer::start() {
   if (!m_started) {

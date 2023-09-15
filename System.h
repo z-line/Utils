@@ -1,17 +1,17 @@
 #ifndef __SYSTEM_H
 #define __SYSTEM_H
 
-#include <string>
-#include <sstream>
-#include <cstdlib>
-#include <cstring>
-#include <cstddef>
-
-#include <unistd.h>
 #include <arpa/inet.h>
+#include <ifaddrs.h>
 #include <net/if.h>
 #include <sys/types.h>
-#include <ifaddrs.h>
+#include <unistd.h>
+
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
+#include <sstream>
+#include <string>
 
 #include "Logger.h"
 

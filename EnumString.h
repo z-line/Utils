@@ -2,9 +2,9 @@
 #ifndef __ENUMSTRING_H
 #define __ENUMSTRING_H
 
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <string>
 
 struct EnumClassHash {
   template <typename T>

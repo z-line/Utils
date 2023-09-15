@@ -1,9 +1,9 @@
 #ifndef __TIMER_H
 #define __TIMER_H
 
-#include <thread>
-#include <functional>
 #include <condition_variable>
+#include <functional>
+#include <thread>
 
 class Timer {
  public:

@@ -1,20 +1,19 @@
 #include "Logger.h"
 
 #ifdef __cplusplus
-#include <iostream>
-#include <sstream>
-#include <map>
+#include <cstring>
 #include <ctime>
 #include <iomanip>
-#include <string>
+#include <iostream>
+#include <map>
 #include <mutex>
-#include <cstring>
+#include <sstream>
 #include <string>
 #else
-#include "stdio.h"
 #include "stdarg.h"
-#include "time.h"
+#include "stdio.h"
 #include "string.h"
+#include "time.h"
 #endif
 
 #define LOG_CTRL_RESET "\x1B[0m"  // Reset to default colors
