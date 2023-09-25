@@ -4,9 +4,9 @@
 
 #include "Logger.h"
 
-Timer::Timer(bool start_immediate, std::function<void(void)> handle,
-             int interval)
-    : m_interval(interval), m_handle(handle) {
+Timer::Timer(std::string name, bool start_immediate,
+             std::function<void(void)> handle, int interval)
+    : m_name(name), m_interval(interval), m_handle(handle) {
   if (start_immediate) {
     start();
   }
@@ -27,7 +27,7 @@ void Timer::stop() {
 }
 
 void Timer::process() {
-  LOG_I() << "Start timer";
+  LOG_I() << "Start timer: " << m_name;
   while (!m_force_stop) {
     std::unique_lock<std::mutex> lock(m_mutex);
     m_started = true;
@@ -36,5 +36,5 @@ void Timer::process() {
         std::cv_status::timeout) {
     }
   }
-  LOG_I() << "Stop timer";
+  LOG_I() << "Stop timer: " << m_name;
 }

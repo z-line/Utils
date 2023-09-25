@@ -7,13 +7,15 @@
 
 class Timer {
  public:
-  Timer(bool start, std::function<void(void)> handle, int interval = 1000);
+  Timer(std::string name, bool start, std::function<void(void)> handle,
+        int interval = 1000);
   ~Timer();
 
   void start();
   void stop();
 
  private:
+ std::string m_name;
   bool m_force_stop = false;
   bool m_started = false;
   int m_interval;
