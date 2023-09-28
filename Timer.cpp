@@ -21,9 +21,10 @@ void Timer::start() {
 }
 
 void Timer::stop() {
-  std::lock_guard<std::mutex> lock(m_mutex);
+  LOG_I() << "Stopping timer";
   m_force_stop = true;
   m_cv.notify_all();
+  m_thread.join();
 }
 
 void Timer::process() {
@@ -32,8 +33,14 @@ void Timer::process() {
     std::unique_lock<std::mutex> lock(m_mutex);
     m_started = true;
     m_handle();
-    if (m_cv.wait_for(lock, std::chrono::milliseconds(m_interval)) ==
-        std::cv_status::timeout) {
+    switch (m_cv.wait_for(lock, std::chrono::milliseconds(m_interval))) {
+      case std::cv_status::no_timeout:
+        break;
+      case std::cv_status::timeout:
+        break;
+      default:
+        LOG_I() << "Wrong condition variable status";
+        break;
     }
   }
   LOG_I() << "Stop timer: " << m_name;
