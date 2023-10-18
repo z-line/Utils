@@ -15,7 +15,7 @@ class Timer {
   void stop();
 
  private:
- std::string m_name;
+  std::string m_name;
   bool m_force_stop = false;
   bool m_started = false;
   int m_interval;

@@ -55,7 +55,7 @@
 #define LOG_CTRL_BG_BRIGHT_CYAN "\x1B[4;46m"
 #define LOG_CTRL_BG_BRIGHT_WHITE "\x1B[4;47m"
 
-static volatile LogLevel_TypeDef m_log_level = LOG_LEVEL_INFO;
+static volatile LogLevel_TypeDef m_log_level = LOG_LEVEL_VERBOSE;
 static volatile bool enable_colorful = true;
 
 #ifdef __cplusplus

@@ -28,7 +28,8 @@ void Timer::stop() {
 }
 
 void Timer::process() {
-  LOG_I() << "Start timer: " << m_name;
+  LOG_I() << "Start timer: " << m_name << " with interval: " << m_interval
+          << " ms";
   while (!m_force_stop) {
     std::unique_lock<std::mutex> lock(m_mutex);
     m_started = true;

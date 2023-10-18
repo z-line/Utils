@@ -6,34 +6,77 @@
 template <typename T>
 class Optional {
  public:
-  Optional(T value) {
-    m_isSet = true;
-    m_value = value;
-  }
-  Optional(){};
+  Optional() : m_value(), m_is_set(false) {}
 
-  bool isSet() { return m_isSet; }
+  Optional(const Optional& copy)
+      : m_value(copy.m_value), m_is_set(copy.m_is_set) {}
 
-  void setValue(T value) {
-    m_isSet = true;
-    m_value = value;
-  }
+  Optional(const T& value) : m_value(value), m_is_set(true) {}
 
-  const T& value() { return m_value; }
+  Optional(T&& value) : m_value(value), m_is_set(true) {}
 
-  bool operator==(const Optional& other) const {
-    return m_isSet == other.m_isSet && m_value == other.m_value;
+  Optional& operator=(const Optional& copy) {
+    m_value = copy.m_value;
+    m_is_set = copy.m_is_set;
+    return (*this);
   }
 
   Optional& operator=(const T& value) {
-    m_isSet = true;
     m_value = value;
-    return *this;
+    m_is_set = true;
+    return (*this);
   }
 
+  bool operator==(const T& value) const {
+    return (m_is_set && (m_value == value));
+  }
+
+  bool operator==(const Optional& value) const {
+    return ((m_is_set == value.m_is_set) && (m_value == value.m_value));
+  }
+
+  bool operator<(const T& value) const {
+    return (m_is_set && (m_value < value));
+  }
+
+  bool operator<(const Optional& value) const {
+    return ((m_is_set == value.m_is_set) && (m_value < value.m_value));
+  }
+
+  bool operator>(const T& value) const {
+    return (m_is_set && (m_value > value));
+  }
+
+  bool operator>(const Optional& value) const {
+    return ((m_is_set == value.m_is_set) && (m_value > value.m_value));
+  }
+
+  operator const T&() const { return m_value; }
+
+  operator T&() {
+    m_is_set = true;
+    return m_value;
+  }
+
+  const T& value() const { return m_value; }
+
+  T& value() {
+    m_is_set = true;
+    return m_value;
+  }
+
+  void setValue(T& value) {
+    m_is_set = true;
+    m_value = value;
+  }
+
+  bool isSet() const { return m_is_set; }
+
+  void clear() { m_is_set = false; }
+
  private:
-  bool m_isSet = false;
   T m_value;
+  bool m_is_set;
 };
 
 #else

@@ -14,8 +14,8 @@ typedef enum {
 
 #ifdef __cplusplus
 
-#include <sstream>
 #include <cstdio>
+#include <sstream>
 
 #include "BaseType.h"
 
@@ -70,7 +70,7 @@ void my_log(LogLevel_TypeDef log_level, const char* const tag, const int line,
 extern "C" {
 #endif
 const char* getFileName(const char* path);
-void log_hex(u8* data,size_t len);
+void log_hex(u8* data, size_t len);
 #ifdef __cplusplus
 }
 #endif
