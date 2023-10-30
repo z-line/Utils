@@ -37,6 +37,11 @@ std::string System::getAppPath(void) {
   return std::string(buffer);
 }
 
+std::string System::getAppDir(void) {
+  std::string appPath = getAppPath();
+  return appPath.substr(0, appPath.find_last_of('/'));
+}
+
 std::string System::getIP(IPType type, std::string interface) {
   std::string ret = "";
   struct ifaddrs* ifaddr = nullptr;
