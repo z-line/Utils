@@ -1,6 +1,25 @@
 #include "System.h"
 
-bool System::mySystem(std::string cmd) {
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
+#include <map>
+#include <set>
+#include <sstream>
+
+#include "Logger.h"
+#include "arpa/inet.h"
+#include "ifaddrs.h"
+#include "net/if.h"
+#include "sys/ioctl.h"
+#include "sys/types.h"
+#include "unistd.h"
+
+using namespace std;
+
+map<string, set<string>> if_list;
+
+bool System::Shell::mySystem(string cmd) {
   int ret = system(cmd.c_str());
   int err = WEXITSTATUS(ret);
   if (err == 0) {
@@ -11,7 +30,7 @@ bool System::mySystem(std::string cmd) {
   return err == 0;
 }
 
-bool System::mySystem(std::string cmd, std::string& ret, bool stderr2stdout) {
+bool System::Shell::mySystem(string cmd, string& ret, bool stderr2stdout) {
   FILE* fp = NULL;
   char data[100] = {'0'};
   fp = popen((cmd + (stderr2stdout ? " 2>&1" : "")).c_str(), "r");
@@ -21,29 +40,61 @@ bool System::mySystem(std::string cmd, std::string& ret, bool stderr2stdout) {
   }
   ret.clear();
   while (fgets(data, sizeof(data), fp) != NULL) {
-    ret += std::string(data);
+    ret += string(data);
   }
   pclose(fp);
   LOG_V() << "exec: [" << cmd << "] ret: " << ret;
   return true;
 }
 
-std::string System::getAppPath(void) {
+string System::Path::getAppPath(void) {
   char buffer[1024];
   ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer));
   if (len == -1) {
     perror("readlink");
   }
-  return std::string(buffer);
+  return string(buffer);
 }
 
-std::string System::getAppDir(void) {
-  std::string appPath = getAppPath();
+string System::Path::getAppDir(void) {
+  string appPath = getAppPath();
   return appPath.substr(0, appPath.find_last_of('/'));
 }
 
-std::string System::getIP(IPType type, std::string interface) {
-  std::string ret = "";
+vector<string> System::Network::getIFList(void) {
+  vector<string> ret;
+  struct ifaddrs* ifaddr = nullptr;
+  getifaddrs(&ifaddr);
+  char buffer[INET6_ADDRSTRLEN];
+  for (struct ifaddrs* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+    inet_ntop(ifa->ifa_addr->sa_family == AF_INET6 ? AF_INET6 : AF_INET,
+              &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr, buffer,
+              sizeof(buffer));
+    string name(ifa->ifa_name);
+    string address(buffer);
+    auto target = if_list.find(string(ifa->ifa_name));
+    if (target != if_list.end()) {
+      target->second.insert(name);
+    } else {
+      ret.push_back(name);
+      if (ifa->ifa_addr->sa_family == AF_INET ||
+          ifa->ifa_addr->sa_family == AF_INET6) {
+        set<string> buf;
+        buf.insert(address);
+        if_list.insert({name, buf});
+      } else {
+        if_list.insert({name, set<string>()});
+      }
+    }
+  }
+  if (ifaddr != nullptr) {
+    freeifaddrs(ifaddr);
+  }
+  return ret;
+}
+
+string System::Network::getIP(IPType type, string interface) {
+  string ret = "";
   struct ifaddrs* ifaddr = nullptr;
   getifaddrs(&ifaddr);
   for (struct ifaddrs* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
@@ -52,14 +103,14 @@ std::string System::getIP(IPType type, std::string interface) {
       void* tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
       char buffer[INET_ADDRSTRLEN];
       inet_ntop(AF_INET, tmpAddrPtr, buffer, sizeof(buffer));
-      ret = std::string(buffer);
+      ret = string(buffer);
       break;
     } else if (type == IPType::IPv6 && ifa->ifa_addr->sa_family == AF_INET6 &&
                strcmp(ifa->ifa_name, interface.c_str()) == 0) {
       void* tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
       char buffer[INET6_ADDRSTRLEN];
       inet_ntop(AF_INET6, tmpAddrPtr, buffer, sizeof(buffer));
-      ret = std::string(buffer);
+      ret = string(buffer);
       break;
     }
   }
@@ -69,11 +120,42 @@ std::string System::getIP(IPType type, std::string interface) {
   return ret;
 }
 
-u16 System::crc16(u8* pdata, size_t len) {
+void System::Network::setIP(std::string ifname, std::string ipv4) {
+  int fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+  struct ifreq if_req;
+  u8 ip[4];
+  if (fd < 0) {
+    LOG_E() << "socket failed";
+    goto exit;
+  }
+
+  memset(&if_req, 0, sizeof(if_req));
+  strncpy(if_req.ifr_ifrn.ifrn_name, ifname.c_str(),
+          sizeof(if_req.ifr_ifrn.ifrn_name));
+
+  sscanf(ipv4.c_str(), "%u.%u.%u.%u", &ip[0], &ip[1], &ip[2], &ip[3]);
+
+  if_req.ifr_ifru.ifru_addr.sa_family = AF_INET;
+  memcpy(&((struct sockaddr_in*)&if_req.ifr_ifru.ifru_addr)->sin_addr.s_addr,
+         ip, sizeof(ip));
+
+  if (ioctl(fd, SIOCSIFADDR, &if_req) < 0) {
+    LOG_E() << "ioctl failed";
+    goto exit;
+  }
+
+  return;
+exit:
+  if (fd >= 0) {
+    close(fd);
+  }
+}
+
+u16 System::Algorithm::crc16(u8* data, size_t len) {
   u32 i;
   u16 crc = 0xFFFF;
   while (len--) {
-    crc ^= *pdata++;
+    crc ^= *data++;
     for (i = 0; i < 8; ++i) {
       if (crc & 1) {
         crc = (crc >> 1) ^ 0xA001;
@@ -85,7 +167,7 @@ u16 System::crc16(u8* pdata, size_t len) {
   return crc;
 }
 
-u32 System::crc32_calculate(u8* data, u32 data_length) {
+u32 System::Algorithm::crc32_calculate(u8* data, u32 data_length) {
 #define Polynomial 0x04c11db7
   u32 crc_value = 0xffffffff;
   u32 xbit = 0x80000000;
@@ -124,4 +206,12 @@ u32 System::crc32_calculate(u8* data, u32 data_length) {
     }
   }
   return crc_value;
+}
+
+u32 System::Algorithm::checksum(u8* data, size_t len) {
+  u32 checksum = 0;
+  for (size_t i = 0; i < len; i++) {
+    checksum += data[i];
+  }
+  return checksum;
 }
