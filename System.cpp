@@ -123,7 +123,7 @@ string System::Network::getIP(IPType type, string interface) {
 void System::Network::setIP(std::string ifname, std::string ipv4) {
   int fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
   struct ifreq if_req;
-  u8 ip[4];
+  uint ip[4];
   if (fd < 0) {
     LOG_E() << "socket failed";
     goto exit;
