@@ -6,7 +6,9 @@ using namespace std;
 
 TimerPool::TimerPool(string name) : m_name(name) { start(); }
 
-TimerPool::~TimerPool() {}
+TimerPool::~TimerPool() {
+  stop();
+}
 
 void TimerPool::start() {
   if (m_thread.get() == nullptr) {

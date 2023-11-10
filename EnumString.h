@@ -52,6 +52,14 @@ class EnumStringHelper {
     return ret;
   }
 
+  std::vector<std::string> getEnumStrs() const {
+    std::vector<std::string> ret;
+    for (auto& it : m_string_to_enum) {
+      ret.push_back(it.first);
+    }
+    return ret;
+  }
+
  private:
   std::unordered_map<EnumType, std::string, EnumClassHash> m_enum_to_string;
   std::unordered_map<std::string, EnumType> m_string_to_enum;
