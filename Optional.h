@@ -3,6 +3,10 @@
 
 #ifdef __cplusplus
 
+#if __cplusplus >= 201703L
+#warning "Recommend to use std::optional"
+#endif
+
 template <typename T>
 class Optional {
  public:
