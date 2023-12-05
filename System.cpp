@@ -61,6 +61,13 @@ string System::Path::getAppDir(void) {
   return appPath.substr(0, appPath.find_last_of('/'));
 }
 
+bool System::Path::exist(string path) {
+  if (access(path.c_str(), F_OK) == 0) {
+    return true;
+  }
+  return false;
+}
+
 vector<string> System::Network::getIFList(void) {
   vector<string> ret;
   struct ifaddrs* ifaddr = nullptr;

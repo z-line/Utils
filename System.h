@@ -27,6 +27,7 @@ namespace Path {
 
 std::string getAppPath(void);
 std::string getAppDir(void);
+bool exist(std::string path);
 
 }  // namespace Path
 
