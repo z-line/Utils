@@ -8,9 +8,13 @@
 #include <sstream>
 
 #include "Logger.h"
+#ifdef __linux__ || __APPLE__
 #include "arpa/inet.h"
 #include "ifaddrs.h"
 #include "net/if.h"
+#elif _WIN32
+#include "windows.h"
+#endif
 #include "sys/ioctl.h"
 #include "sys/types.h"
 #include "unistd.h"
@@ -20,6 +24,7 @@ using namespace std;
 map<string, set<string>> if_list;
 
 bool System::Shell::mySystem(string cmd) {
+#ifdef __linux__ || __APPLE__
   int ret = system(cmd.c_str());
   int err = WEXITSTATUS(ret);
   if (err == 0) {
@@ -28,6 +33,9 @@ bool System::Shell::mySystem(string cmd) {
     LOG_E() << "exec: [" << cmd << "] fail";
   }
   return err == 0;
+#elif _WIN32
+// TODO finish this
+#endif
 }
 
 bool System::Shell::mySystem(string cmd, string& ret, bool stderr2stdout) {
@@ -48,11 +56,15 @@ bool System::Shell::mySystem(string cmd, string& ret, bool stderr2stdout) {
 }
 
 string System::Path::getAppPath(void) {
-  char buffer[1024];
+  char buffer[512];
+#ifdef __linux__ || __APPLE__
   ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer));
   if (len == -1) {
     perror("readlink");
   }
+#elif _WIN32
+  GetCurrentDirectoryA(sizeof(buffer), buffer);
+#endif
   return string(buffer);
 }
 
@@ -70,6 +82,8 @@ bool System::Path::exist(string path) {
 
 vector<string> System::Network::getIFList(void) {
   vector<string> ret;
+
+#ifdef __linux__ || __APPLE__
   struct ifaddrs* ifaddr = nullptr;
   getifaddrs(&ifaddr);
   char buffer[INET6_ADDRSTRLEN];
@@ -97,11 +111,16 @@ vector<string> System::Network::getIFList(void) {
   if (ifaddr != nullptr) {
     freeifaddrs(ifaddr);
   }
+#elif _WIN32
+// TODO finish
+#endif
+
   return ret;
 }
 
 string System::Network::getIP(IPType type, string interface) {
   string ret = "";
+#ifdef __linux__ || __APPLE__
   struct ifaddrs* ifaddr = nullptr;
   getifaddrs(&ifaddr);
   for (struct ifaddrs* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
@@ -124,6 +143,9 @@ string System::Network::getIP(IPType type, string interface) {
   if (ifaddr != nullptr) {
     freeifaddrs(ifaddr);
   }
+#elif _WIN32
+// TODO finish this
+#endif
   return ret;
 }
 
