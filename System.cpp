@@ -12,10 +12,10 @@
 #include "arpa/inet.h"
 #include "ifaddrs.h"
 #include "net/if.h"
+#include "sys/ioctl.h"
 #elif _WIN32
 #include "windows.h"
 #endif
-#include "sys/ioctl.h"
 #include "sys/types.h"
 #include "unistd.h"
 
@@ -118,7 +118,7 @@ vector<string> System::Network::getIFList(void) {
   return ret;
 }
 
-string System::Network::getIP(IPType type, string interface) {
+string System::Network::getIP(IPType type, string iface) {
   string ret = "";
 #if defined(__linux__) || defined(__APPLE__)
   struct ifaddrs* ifaddr = nullptr;
@@ -150,6 +150,7 @@ string System::Network::getIP(IPType type, string interface) {
 }
 
 void System::Network::setIP(std::string ifname, std::string ipv4) {
+#if defined(__linux__) || defined(__APPLE__)
   int fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
   struct ifreq if_req;
   uint ip[4];
@@ -178,6 +179,9 @@ exit:
   if (fd >= 0) {
     close(fd);
   }
+#else defined(_WIN32)
+
+#endif
 }
 
 u16 System::Algorithm::crc16(u8* data, size_t len) {
