@@ -105,8 +105,12 @@ Logger::~Logger() {
   }
   char time_str[64];
   get_datetime(time_str, sizeof(time_str));
-  std::cout << colorful_map[m_level] << "[" << time_str << "]"
-            << LOG_CTRL_RESET;
+  std::cout << colorful_map[m_level] << "[" << time_str << "."
+            << (std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::system_clock::now().time_since_epoch())
+                    .count() %
+                1000)
+            << "]" << LOG_CTRL_RESET;
   std::cout << " - " << m_filename << ":" << m_line << " - "
             << m_log_output.str() << std::endl;
 }
