@@ -125,14 +125,14 @@ string System::Network::getIP(IPType type, string iface) {
   getifaddrs(&ifaddr);
   for (struct ifaddrs* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
     if (type == IPType::IPv4 && ifa->ifa_addr->sa_family == AF_INET &&
-        strcmp(ifa->ifa_name, interface.c_str()) == 0) {
+        strcmp(ifa->ifa_name, iface.c_str()) == 0) {
       void* tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
       char buffer[INET_ADDRSTRLEN];
       inet_ntop(AF_INET, tmpAddrPtr, buffer, sizeof(buffer));
       ret = string(buffer);
       break;
     } else if (type == IPType::IPv6 && ifa->ifa_addr->sa_family == AF_INET6 &&
-               strcmp(ifa->ifa_name, interface.c_str()) == 0) {
+               strcmp(ifa->ifa_name, iface.c_str()) == 0) {
       void* tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
       char buffer[INET6_ADDRSTRLEN];
       inet_ntop(AF_INET6, tmpAddrPtr, buffer, sizeof(buffer));
@@ -179,7 +179,7 @@ exit:
   if (fd >= 0) {
     close(fd);
   }
-#else defined(_WIN32)
+#elif defined(_WIN32)
 
 #endif
 }
