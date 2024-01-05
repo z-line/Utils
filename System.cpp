@@ -124,6 +124,9 @@ string System::Network::getIP(IPType type, string iface) {
   struct ifaddrs* ifaddr = nullptr;
   getifaddrs(&ifaddr);
   for (struct ifaddrs* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+    if (ifa->ifa_addr == nullptr) {
+      continue;
+    }
     if (type == IPType::IPv4 && ifa->ifa_addr->sa_family == AF_INET &&
         strcmp(ifa->ifa_name, iface.c_str()) == 0) {
       void* tmpAddrPtr = &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr;
