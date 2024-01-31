@@ -20,8 +20,10 @@ class Optional {
   Optional(T&& value) : m_value(value), m_is_set(true) {}
 
   Optional& operator=(const Optional& copy) {
-    m_value = copy.m_value;
-    m_is_set = copy.m_is_set;
+    if (this != &copy) {
+      m_value = copy.m_value;
+      m_is_set = copy.m_is_set;
+    }
     return (*this);
   }
 
@@ -57,17 +59,7 @@ class Optional {
 
   operator const T&() const { return m_value; }
 
-  operator T&() {
-    m_is_set = true;
-    return m_value;
-  }
-
   const T& value() const { return m_value; }
-
-  T& value() {
-    m_is_set = true;
-    return m_value;
-  }
 
   void setValue(T& value) {
     m_is_set = true;
