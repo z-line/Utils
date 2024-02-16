@@ -1,7 +1,7 @@
 #ifndef __RINGBUFFER_H
 #define __RINGBUFFER_H
 
-#include "BaseType.h"
+#include "../BaseType.h"
 #include "stdbool.h"
 
 typedef struct {

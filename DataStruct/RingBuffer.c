@@ -1,5 +1,6 @@
 #include "RingBuffer.h"
 
+#include "stdlib.h"
 #include "memory.h"
 #include "stddef.h"
 
