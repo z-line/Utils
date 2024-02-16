@@ -11,6 +11,7 @@
 #include <string>
 #else
 #include "stdarg.h"
+#include "stdbool.h"
 #include "stdio.h"
 #include "string.h"
 #include "time.h"
@@ -72,7 +73,7 @@ static const STRING_TYPE colorful_map[] = {
     [LOG_LEVEL_VERBOSE] = LOG_CTRL_TEXT_CYAN,
 };
 
-void get_datetime(char* buffer, size_t buffer_len) {
+void get_datetime_str(char* buffer, size_t buffer_len) {
   time_t timestamp = time(NULL);
   strftime(buffer, buffer_len, "%Y-%m-%d %H:%M:%S", localtime(&timestamp));
 }
@@ -104,7 +105,7 @@ Logger::~Logger() {
     return;
   }
   char time_str[64];
-  get_datetime(time_str, sizeof(time_str));
+  get_datetime_str(time_str, sizeof(time_str));
   std::cout << colorful_map[m_level] << "[" << time_str << "."
             << (std::chrono::duration_cast<std::chrono::milliseconds>(
                     std::chrono::system_clock::now().time_since_epoch())
@@ -135,7 +136,7 @@ void my_log(LogLevel_TypeDef log_level, const char* const tag, const int line,
     va_list args;
     va_start(args, format);
     char datetime_str[32];
-    get_datetime(datetime_str, sizeof(datetime_str));
+    get_datetime_str(datetime_str, sizeof(datetime_str));
     if (enable_colorful) {
       printf("%s[%s] - %s:%d - ", colorful_map[log_level], datetime_str, tag,
              line);

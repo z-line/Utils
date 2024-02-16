@@ -1,6 +1,9 @@
 #ifndef __LOGGER_H
 #define __LOGGER_H
 
+#include "BaseType.h"
+#include "stddef.h"
+
 #define __FILENAME__ getFileName(__FILE__)
 
 typedef enum {
@@ -16,8 +19,6 @@ typedef enum {
 
 #include <cstdio>
 #include <sstream>
-
-#include "BaseType.h"
 
 #define LOG_E() Logger(LOG_LEVEL_ERROR, __FILENAME__, __LINE__)
 #define LOG_W() Logger(LOG_LEVEL_WARNING, __FILENAME__, __LINE__)
