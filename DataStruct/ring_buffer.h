@@ -1,5 +1,5 @@
-#ifndef __RINGBUFFER_H
-#define __RINGBUFFER_H
+#ifndef __RING_BUFFER_H
+#define __RING_BUFFER_H
 
 #include "../BaseType.h"
 #include "stdbool.h"
@@ -22,5 +22,6 @@ bool ring_buffer_push(ring_buffer_context_t* context, void* item);
 bool ring_buffer_pop(ring_buffer_context_t* context, void* item);
 void ring_buffer_clear(ring_buffer_context_t* context);
 u32 ring_buffer_item_count(ring_buffer_context_t* context);
+
 
 #endif
