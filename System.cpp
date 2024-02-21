@@ -21,8 +21,6 @@
 
 using namespace std;
 
-map<string, set<string>> if_list;
-
 bool System::Shell::mySystem(string cmd) {
 #if defined(__linux__) || defined(__APPLE__)
   int ret = system(cmd.c_str());
@@ -80,8 +78,8 @@ bool System::Path::exist(string path) {
   return false;
 }
 
-vector<string> System::Network::getIFList(void) {
-  vector<string> ret;
+set<string> System::Network::getIFList(void) {
+  set<string> ret;
 
 #if defined(__linux__) || defined(__APPLE__)
   struct ifaddrs* ifaddr = nullptr;
@@ -93,19 +91,12 @@ vector<string> System::Network::getIFList(void) {
               sizeof(buffer));
     string name(ifa->ifa_name);
     string address(buffer);
-    auto target = if_list.find(string(ifa->ifa_name));
-    if (target != if_list.end()) {
-      target->second.insert(name);
+    ret.insert(name);
+    if (ifa->ifa_addr->sa_family == AF_INET ||
+        ifa->ifa_addr->sa_family == AF_INET6) {
+      set<string> buf;
+      buf.insert(address);
     } else {
-      ret.push_back(name);
-      if (ifa->ifa_addr->sa_family == AF_INET ||
-          ifa->ifa_addr->sa_family == AF_INET6) {
-        set<string> buf;
-        buf.insert(address);
-        if_list.insert({name, buf});
-      } else {
-        if_list.insert({name, set<string>()});
-      }
     }
   }
   if (ifaddr != nullptr) {

@@ -2,7 +2,7 @@
 #define __SYSTEM_H
 
 #include <string>
-#include <vector>
+#include <set>
 
 #include "BaseType.h"
 
@@ -18,7 +18,7 @@ namespace Network {
 
 enum class IPType { IPv4, IPv6 };
 
-std::vector<std::string> getIFList(void);
+std::set<std::string> getIFList(void);
 std::string getIP(IPType type, std::string iface);
 void setIP(std::string ifname, std::string ipv4);
 
