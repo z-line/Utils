@@ -26,10 +26,10 @@ NetInterfaceMonitor::~NetInterfaceMonitor() {
   m_force_stop = true;
   if (m_netlink_socket >= 0) {
     shutdown(m_netlink_socket, SHUT_RDWR);
-    close(m_netlink_socket);
   }
-  if (m_thread.get() == nullptr) {
+  if (m_thread.get() != nullptr) {
     m_thread->join();
+    close(m_netlink_socket);
   }
 }
 
@@ -41,19 +41,19 @@ void NetInterfaceMonitor::handle_net_route(void* nlh) {
   char tmp[256];
 
   for (attr = IFLA_RTA(rt); RTA_OK(attr, len); attr = RTA_NEXT(attr, len)) {
-//    LOG_I() << "route " << attr->rta_type;
+    //    LOG_I() << "route " << attr->rta_type;
     switch (attr->rta_type) {
       case RTA_DST:
         inet_ntop(rt->rtm_family, RTA_DATA(attr), tmp, sizeof(tmp));
-//        printf("DST: %s", tmp);
+        //        printf("DST: %s", tmp);
         break;
       case RTA_SRC:
         inet_ntop(rt->rtm_family, RTA_DATA(attr), tmp, sizeof(tmp));
-//        printf("SRC: %s", tmp);
+        //        printf("SRC: %s", tmp);
         break;
       case RTA_GATEWAY:
         inet_ntop(rt->rtm_family, RTA_DATA(attr), tmp, sizeof(tmp));
-//        printf("GATEWAY: %s", tmp);
+        //        printf("GATEWAY: %s", tmp);
         break;
       default:
         break;
@@ -68,11 +68,12 @@ void NetInterfaceMonitor::handle_net_link(void* nlh) {
   int len;
 
   for (attr = IFLA_RTA(ifi); RTA_OK(attr, len); attr = RTA_NEXT(attr, len)) {
-//    LOG_I() << "link " << attr->rta_type;
+    //    LOG_I() << "link " << attr->rta_type;
     switch (attr->rta_type) {
       case IFLA_IFNAME:
-//        printf("Interface %d : %s %s\n", ifi->ifi_index, (char*)RTA_DATA(attr),
-//               (ifi->ifi_flags & IFF_RUNNING) ? "running" : "");
+        //        printf("Interface %d : %s %s\n", ifi->ifi_index,
+        //        (char*)RTA_DATA(attr),
+        //               (ifi->ifi_flags & IFF_RUNNING) ? "running" : "");
         break;
       default:
         break;
@@ -88,14 +89,14 @@ void NetInterfaceMonitor::handle_net_addr(void* nlh) {
   int len;
 
   for (attr = IFLA_RTA(ifaddr); RTA_OK(attr, len); attr = RTA_NEXT(attr, len)) {
-//    LOG_I() << "addr " << attr->rta_type;
+    //    LOG_I() << "addr " << attr->rta_type;
     switch (attr->rta_type) {
       case IFA_LABEL:
-//        printf("%s\n", (char*)RTA_DATA(attr));
+        //        printf("%s\n", (char*)RTA_DATA(attr));
         break;
       case IFA_ADDRESS:
         inet_ntop(ifaddr->ifa_family, RTA_DATA(attr), tmp, sizeof(tmp));
-//        printf("%s ", tmp);
+        //        printf("%s ", tmp);
         break;
       default:
         break;
@@ -121,13 +122,15 @@ void NetInterfaceMonitor::process(void) {
   char buffer[BUFSIZE];
   struct nlmsghdr* nlh;
 
+  LOG_I() << "Start net interface monitor";
   while (!m_force_stop) {
+    // FIXME block in recv when destruct this instance
     ssize_t len = recv(m_netlink_socket, buffer, sizeof(buffer), 0);
     if (len != -1) {
       m_callback();
       for (nlh = (struct nlmsghdr*)buffer; NLMSG_OK(nlh, len);
            nlh = NLMSG_NEXT(nlh, len)) {
-//        LOG_I() << "event " << nlh->nlmsg_type;
+        //        LOG_I() << "event " << nlh->nlmsg_type;
         switch (nlh->nlmsg_type) {
           case NLMSG_DONE:
           case NLMSG_ERROR:
@@ -150,4 +153,5 @@ void NetInterfaceMonitor::process(void) {
       }
     }
   }
+  LOG_I() << "Stop net interface monitor";
 }
