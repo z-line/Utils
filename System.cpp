@@ -86,17 +86,21 @@ set<string> System::Network::getIFList(void) {
   getifaddrs(&ifaddr);
   char buffer[INET6_ADDRSTRLEN];
   for (struct ifaddrs* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
-    inet_ntop(ifa->ifa_addr->sa_family == AF_INET6 ? AF_INET6 : AF_INET,
-              &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr, buffer,
-              sizeof(buffer));
     string name(ifa->ifa_name);
-    string address(buffer);
     ret.insert(name);
-    if (ifa->ifa_addr->sa_family == AF_INET ||
-        ifa->ifa_addr->sa_family == AF_INET6) {
-      set<string> buf;
-      buf.insert(address);
-    } else {
+    if (ifa->ifa_addr == nullptr) {
+      continue;
+    }
+    switch (ifa->ifa_addr->sa_family) {
+      case AF_INET6:
+      case AF_INET: {
+        inet_ntop(ifa->ifa_addr->sa_family,
+                  &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr, buffer,
+                  sizeof(buffer));
+        string address(buffer);
+      } break;
+      default:
+        break;
     }
   }
   if (ifaddr != nullptr) {
