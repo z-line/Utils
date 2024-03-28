@@ -38,6 +38,7 @@ PathWatcher::~PathWatcher() {
 }
 
 void PathWatcher::process_handle(void) {
+  pthread_setname_np(pthread_self(), "PathWatcher");
   u8 buffer[BUFFER_LEN];
   while (!m_stop) {
     int length = read(m_fd, buffer, BUFFER_LEN);

@@ -6,9 +6,7 @@ using namespace std;
 
 TimerPool::TimerPool(string name) : m_name(name) { start(); }
 
-TimerPool::~TimerPool() {
-  stop();
-}
+TimerPool::~TimerPool() { stop(); }
 
 void TimerPool::start() {
   if (m_thread.get() == nullptr) {
@@ -37,6 +35,7 @@ void TimerPool::addItem(function<void(void)> handle, bool repeat,
 }
 
 void TimerPool::process() {
+  pthread_setname_np(pthread_self(), "TimerPool");
   LOG_I() << "Start timer: " << m_name;
   while (!m_force_stop) {
     unique_lock<mutex> lock(m_mutex);

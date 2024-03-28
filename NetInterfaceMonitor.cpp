@@ -105,6 +105,7 @@ void NetInterfaceMonitor::handle_net_addr(void* nlh) {
 }
 
 void NetInterfaceMonitor::process(void) {
+  pthread_setname_np(pthread_self(), "NetIfaceMonitor");
   m_netlink_socket = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
   if (m_netlink_socket == -1) {
     throw std::runtime_error("netlink open failed");
