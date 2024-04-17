@@ -26,10 +26,10 @@ NetInterfaceMonitor::~NetInterfaceMonitor() {
   m_force_stop = true;
   if (m_netlink_socket >= 0) {
     shutdown(m_netlink_socket, SHUT_RDWR);
+    close(m_netlink_socket);
   }
   if (m_thread.get() != nullptr) {
     m_thread->join();
-    close(m_netlink_socket);
   }
 }
 
@@ -106,10 +106,22 @@ void NetInterfaceMonitor::handle_net_addr(void* nlh) {
 }
 
 void NetInterfaceMonitor::process(void) {
+  uint32_t retry = 0;
   pthread_setname_np(pthread_self(), "NetIfaceMonitor");
-  m_netlink_socket = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
-  if (m_netlink_socket == -1) {
-    throw std::runtime_error("netlink open failed");
+  do {
+    m_netlink_socket = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    if (m_netlink_socket == -1) {
+      LOG_W() << "retry open netlink " << retry++ << " times";
+      std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
+  } while (m_netlink_socket == -1 && !m_force_stop);
+
+  struct timeval timeout = {.tv_sec = 1, .tv_usec = 0};
+  while (setsockopt(m_netlink_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                    sizeof(timeout)) < 0 &&
+         !m_force_stop) {
+    LOG_W() << "retry set timeout of netlink " << retry++ << " times";
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
 
   struct sockaddr_nl sa;
@@ -117,8 +129,11 @@ void NetInterfaceMonitor::process(void) {
   sa.nl_family = AF_NETLINK;
   sa.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV4_ROUTE |
                  RTMGRP_IPV6_IFADDR | RTMGRP_IPV6_ROUTE;
-  if (bind(m_netlink_socket, (struct sockaddr*)&sa, sizeof(sa)) == -1) {
-    throw std::runtime_error("netlink bind failed");
+  retry = 0;
+  while (bind(m_netlink_socket, (struct sockaddr*)&sa, sizeof(sa)) == -1 &&
+         !m_force_stop) {
+    LOG_W() << "retry bind netlink " << retry++ << " times";
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
 
   char buffer[BUFSIZE];
@@ -128,13 +143,23 @@ void NetInterfaceMonitor::process(void) {
   while (!m_force_stop) {
     // FIXME block in recv when destruct this instance
     ssize_t len = recv(m_netlink_socket, buffer, sizeof(buffer), 0);
-    if (len != -1) {
+    if (len == 0) {
+      LOG_W() << "Netlink has been close by server";
+    } else if (len < 0) {
+      switch (errno) {
+        case EAGAIN:
+        case EINTR:
+          break;
+        default:
+          LOG_W() << "Recv netlink failed: " << errno;
+          break;
+      }
+    } else {
       m_callback();
       continue;
-      //FIXME 下面处理可能会导致奔溃
       for (nlh = (struct nlmsghdr*)buffer; NLMSG_OK(nlh, len);
            nlh = NLMSG_NEXT(nlh, len)) {
-        //        LOG_I() << "event " << nlh->nlmsg_type;
+        // LOG_I() << "event " << nlh->nlmsg_type;
         switch (nlh->nlmsg_type) {
           case NLMSG_DONE:
           case NLMSG_ERROR:
