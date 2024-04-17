@@ -88,6 +88,7 @@ void NetInterfaceMonitor::handle_net_addr(void* nlh) {
   char tmp[256];
   int len;
 
+  // FIXME 此处长挂会奔溃
   for (attr = IFLA_RTA(ifaddr); RTA_OK(attr, len); attr = RTA_NEXT(attr, len)) {
     //    LOG_I() << "addr " << attr->rta_type;
     switch (attr->rta_type) {
@@ -129,6 +130,8 @@ void NetInterfaceMonitor::process(void) {
     ssize_t len = recv(m_netlink_socket, buffer, sizeof(buffer), 0);
     if (len != -1) {
       m_callback();
+      continue;
+      //FIXME 下面处理可能会导致奔溃
       for (nlh = (struct nlmsghdr*)buffer; NLMSG_OK(nlh, len);
            nlh = NLMSG_NEXT(nlh, len)) {
         //        LOG_I() << "event " << nlh->nlmsg_type;
