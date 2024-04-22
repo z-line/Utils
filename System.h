@@ -1,8 +1,8 @@
 #ifndef __SYSTEM_H
 #define __SYSTEM_H
 
-#include <string>
 #include <set>
+#include <string>
 
 #include "BaseType.h"
 
@@ -16,8 +16,18 @@ bool mySystem(std::string cmd, std::string& ret, bool stderr2stdout = true);
 }  // namespace Shell
 namespace Network {
 
+struct Info {
+  std::string name;
+  std::string ip;
+  std::string netmask;
+  std::string gateway;
+
+  bool operator<(const Info& value) const { return name < value.name; }
+};
+
 enum class IPType { IPv4, IPv6 };
 
+std::set<Info> getIfaceInfo(void);
 std::set<std::string> getIFList(void);
 std::string getIP(IPType type, std::string iface);
 void setIP(std::string ifname, std::string ipv4);

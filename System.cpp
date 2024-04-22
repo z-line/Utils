@@ -78,6 +78,43 @@ bool System::Path::exist(string path) {
   return false;
 }
 
+set<System::Network::Info> System::Network::getIfaceInfo(void) {
+  set<System::Network::Info> ret;
+#if defined(__linux__) || defined(__APPLE__)
+  struct ifaddrs* ifaddr = nullptr;
+  getifaddrs(&ifaddr);
+  for (struct ifaddrs* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+    if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET) {
+      continue;
+    }
+    System::Network::Info iface_info;
+    // interface name
+    iface_info.name = string(ifa->ifa_name);
+    // ip address
+    struct sockaddr_in* ipv4 = (struct sockaddr_in*)ifa->ifa_addr;
+    iface_info.ip = string(inet_ntoa(ipv4->sin_addr));
+    // netmask
+    struct sockaddr_in* netmask = (struct sockaddr_in*)ifa->ifa_netmask;
+    if (netmask != nullptr) {
+      iface_info.netmask = string(inet_ntoa(netmask->sin_addr));
+    }
+    // gateway
+    struct sockaddr_in* dst_addr =
+        (struct sockaddr_in*)ifa->ifa_ifu.ifu_dstaddr;
+    if (dst_addr != nullptr) {
+      iface_info.gateway = string(inet_ntoa(dst_addr->sin_addr));
+    }
+    ret.insert(iface_info);
+  }
+  if (ifaddr != nullptr) {
+    freeifaddrs(ifaddr);
+  }
+#elif defined(_WIN32)
+// TODO finish this
+#endif
+  return ret;
+}
+
 set<string> System::Network::getIFList(void) {
   set<string> ret;
 
