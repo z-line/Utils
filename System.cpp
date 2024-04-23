@@ -99,11 +99,9 @@ set<System::Network::Info> System::Network::getIfaceInfo(void) {
       iface_info.netmask = string(inet_ntoa(netmask->sin_addr));
     }
     // gateway
-    struct sockaddr_in* dst_addr =
-        (struct sockaddr_in*)ifa->ifa_ifu.ifu_dstaddr;
-    if (dst_addr != nullptr) {
-      iface_info.gateway = string(inet_ntoa(dst_addr->sin_addr));
-    }
+    Shell::mySystem("ip route | grep default | grep " + iface_info.name +
+                        " | awk '{print $3}'",
+                    iface_info.gateway);
     ret.insert(iface_info);
   }
   if (ifaddr != nullptr) {
