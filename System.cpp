@@ -3,9 +3,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
-#include <map>
 #include <set>
-#include <sstream>
 
 #include "Logger.h"
 #if defined(__linux__) || defined(__APPLE__)
@@ -180,41 +178,6 @@ string System::Network::getIP(IPType type, string iface) {
 // TODO finish this
 #endif
   return ret;
-}
-
-void System::Network::setIP(std::string ifname, std::string ipv4) {
-#if defined(__linux__) || defined(__APPLE__)
-  int fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
-  struct ifreq if_req;
-  uint ip[4];
-  if (fd < 0) {
-    LOG_E() << "socket failed";
-    goto exit;
-  }
-
-  memset(&if_req, 0, sizeof(if_req));
-  strncpy(if_req.ifr_ifrn.ifrn_name, ifname.c_str(),
-          sizeof(if_req.ifr_ifrn.ifrn_name));
-
-  sscanf(ipv4.c_str(), "%u.%u.%u.%u", &ip[0], &ip[1], &ip[2], &ip[3]);
-
-  if_req.ifr_ifru.ifru_addr.sa_family = AF_INET;
-  memcpy(&((struct sockaddr_in*)&if_req.ifr_ifru.ifru_addr)->sin_addr.s_addr,
-         ip, sizeof(ip));
-
-  if (ioctl(fd, SIOCSIFADDR, &if_req) < 0) {
-    LOG_E() << "ioctl failed";
-    goto exit;
-  }
-
-  return;
-exit:
-  if (fd >= 0) {
-    close(fd);
-  }
-#elif defined(_WIN32)
-
-#endif
 }
 
 u16 System::Algorithm::crc16(u8* data, size_t len) {

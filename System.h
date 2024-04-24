@@ -30,7 +30,6 @@ enum class IPType { IPv4, IPv6 };
 std::set<Info> getIfaceInfo(void);
 std::set<std::string> getIFList(void);
 std::string getIP(IPType type, std::string iface);
-void setIP(std::string ifname, std::string ipv4);
 
 }  // namespace Network
 namespace Path {
