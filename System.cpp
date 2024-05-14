@@ -96,6 +96,8 @@ set<System::Network::Info> System::Network::getIfaceInfo(void) {
     if (netmask != nullptr) {
       iface_info.netmask = string(inet_ntoa(netmask->sin_addr));
     }
+    // link
+    iface_info.link = ifa->ifa_flags & IFF_RUNNING;
     // gateway
     Shell::mySystem("ip route | grep default | grep " + iface_info.name +
                         " | awk '{print $3}'",
