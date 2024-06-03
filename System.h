@@ -21,6 +21,7 @@ struct Info {
   std::string ip;
   std::string netmask;
   std::string gateway;
+  std::string mac;
   bool link;
 
   bool operator<(const Info& value) const { return name < value.name; }

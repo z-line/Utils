@@ -102,6 +102,10 @@ set<System::Network::Info> System::Network::getIfaceInfo(void) {
     Shell::mySystem("ip route | grep default | grep " + iface_info.name +
                         " | awk '{print $3}'",
                     iface_info.gateway);
+    // mac
+    Shell::mySystem(
+        "ip link show " + iface_info.name + " | grep ether | awk '{print $2}'",
+        iface_info.mac);
     ret.insert(iface_info);
   }
   if (ifaddr != nullptr) {
