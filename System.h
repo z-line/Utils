@@ -23,6 +23,7 @@ struct Info {
   std::string gateway;
   std::string mac;
   bool link;
+  bool up;
 
   bool operator<(const Info& value) const { return name < value.name; }
 };

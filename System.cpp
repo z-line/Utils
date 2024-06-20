@@ -1,9 +1,11 @@
 #include "System.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <set>
+#include <unordered_map>
 
 #include "Logger.h"
 #if defined(__linux__) || defined(__APPLE__)
@@ -77,36 +79,48 @@ bool System::Path::exist(string path) {
 }
 
 set<System::Network::Info> System::Network::getIfaceInfo(void) {
+  std::unordered_map<std::string, System::Network::Info> buffer;
   set<System::Network::Info> ret;
 #if defined(__linux__) || defined(__APPLE__)
   struct ifaddrs* ifaddr = nullptr;
   getifaddrs(&ifaddr);
   for (struct ifaddrs* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
-    if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET) {
+    if (ifa->ifa_addr == nullptr) {
       continue;
     }
-    System::Network::Info iface_info;
-    // interface name
-    iface_info.name = string(ifa->ifa_name);
-    // ip address
-    struct sockaddr_in* ipv4 = (struct sockaddr_in*)ifa->ifa_addr;
-    iface_info.ip = string(inet_ntoa(ipv4->sin_addr));
-    // netmask
-    struct sockaddr_in* netmask = (struct sockaddr_in*)ifa->ifa_netmask;
-    if (netmask != nullptr) {
-      iface_info.netmask = string(inet_ntoa(netmask->sin_addr));
+    auto found = buffer.find(ifa->ifa_name);
+    if (found == buffer.end()) {
+      auto emplace_ret = buffer.emplace(ifa->ifa_name, Info());
+      if (emplace_ret.second) {
+        found = emplace_ret.first;
+      } else {
+        continue;
+      }
     }
+    // interface name
+    found->second.name = string(ifa->ifa_name);
+    // ip address
+    if (ifa->ifa_addr != nullptr && ifa->ifa_addr->sa_family == AF_INET) {
+      struct sockaddr_in* ipv4 = (struct sockaddr_in*)ifa->ifa_addr;
+      found->second.ip = string(inet_ntoa(ipv4->sin_addr));
+    }
+    // netmask
+    if (ifa->ifa_netmask != nullptr) {
+      struct sockaddr_in* netmask = (struct sockaddr_in*)ifa->ifa_netmask;
+      found->second.netmask = string(inet_ntoa(netmask->sin_addr));
+    }
+    // up
+    found->second.up = ifa->ifa_flags & IFF_UP;
     // link
-    iface_info.link = ifa->ifa_flags & IFF_RUNNING;
+    found->second.link = ifa->ifa_flags & IFF_RUNNING;
     // gateway
-    Shell::mySystem("ip route | grep default | grep " + iface_info.name +
+    Shell::mySystem("ip route | grep default | grep " + found->second.name +
                         " | awk '{print $3}'",
-                    iface_info.gateway);
+                    found->second.gateway);
     // mac
-    Shell::mySystem(
-        "ip link show " + iface_info.name + " | grep ether | awk '{print $2}'",
-        iface_info.mac);
-    ret.insert(iface_info);
+    Shell::mySystem("ip link show " + found->second.name +
+                        " | grep ether | awk '{print $2}'",
+                    found->second.mac);
   }
   if (ifaddr != nullptr) {
     freeifaddrs(ifaddr);
@@ -114,6 +128,9 @@ set<System::Network::Info> System::Network::getIfaceInfo(void) {
 #elif defined(_WIN32)
 // TODO finish this
 #endif
+  std::transform(
+      buffer.begin(), buffer.end(), std::inserter(ret, ret.end()),
+      [](const std::pair<std::string, Info>& pair) { return pair.second; });
   return ret;
 }
 
