@@ -8,25 +8,18 @@
 
 #define BUFFER_LEN (128 * sizeof(struct inotify_event))
 
-PathWatcher::PathWatcher(std::string path, std::function<void(void)> handle)
-    : m_path(path), m_callback(handle) {
+PathWatcher::PathWatcher() {
   m_fd = inotify_init();
   if (m_fd < 0) {
     throw std::runtime_error("inotify init failed");
   }
-  m_wd = inotify_add_watch(m_fd, path.c_str(), IN_MODIFY);
-  if (m_wd < 0) {
-    throw std::runtime_error("watch failed");
-  }
-  m_thread =
-      new std::thread(std::bind(&PathWatcher::process_handle, this), nullptr);
-  LOG_I() << "Watch " << m_path;
 }
 
 PathWatcher::~PathWatcher() {
-  if (m_wd >= 0) {
-    inotify_rm_watch(m_fd, m_wd);
+  for (auto it : m_wd_list) {
+    inotify_rm_watch(m_fd, it.first);
   }
+
   if (m_fd >= 0) {
     close(m_fd);
   }
@@ -34,7 +27,61 @@ PathWatcher::~PathWatcher() {
     m_stop = true;
     m_thread->join();
   }
-  LOG_I() << "Delete watch of " << m_path;
+  LOG_I() << "Destroy PathWatcher ";
+}
+
+bool PathWatcher::addPathObserver(std::string path, IPathObserver* observer) {
+  auto range = m_observer_list.equal_range(path);
+  for (auto it = range.first; it != range.second; ++it) {
+    if (it->second == observer) {
+      LOG_W() << "Observer have been registered on " << path;
+      return false;
+    }
+  }
+  m_observer_list.emplace(path, observer);
+  bool found = false;
+  for (auto it : m_wd_list) {
+    if (it.second == path) {
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    int wd = inotify_add_watch(m_fd, path.c_str(), IN_MODIFY);
+    if (wd < 0) {
+      throw std::runtime_error("watch failed");
+    }
+    m_wd_list.emplace(wd, path);
+    if (!m_thread) {
+      m_thread = new std::thread(std::bind(&PathWatcher::process_handle, this),
+                                 nullptr);
+    }
+  }
+  LOG_I() << "Add observer on " << path;
+  return true;
+}
+
+bool PathWatcher::removePathObserver(std::string path,
+                                     IPathObserver* observer) {
+  auto range = m_observer_list.equal_range(path);
+  if (std::distance(range.first, range.second) == 1) {
+    for (auto it : m_wd_list) {
+      if (it.second == path) {
+        m_observer_list.erase(range.first);
+        inotify_rm_watch(m_fd, it.first);
+        return true;
+      }
+    }
+    LOG_E() << "observer mismatch with wd";
+  } else {
+    for (auto it = range.first; it != range.second; ++it) {
+      if (it->second == observer) {
+        m_observer_list.erase(it);
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 void PathWatcher::process_handle(void) {
@@ -49,10 +96,9 @@ void PathWatcher::process_handle(void) {
     while (i < length / sizeof(struct inotify_event)) {
       struct inotify_event* event = ((struct inotify_event*)buffer) + i;
       if (event->mask & IN_MODIFY) {
-        if (m_callback) {
-          m_callback();
-        } else {
-          LOG_W() << "not callback";
+        auto range = m_observer_list.equal_range(m_wd_list[event->wd]);
+        for (auto it = range.first; it != range.second; ++i) {
+          it->second->pathChanged(m_wd_list[event->wd]);
         }
       }
       i++;
