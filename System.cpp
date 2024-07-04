@@ -12,7 +12,6 @@
 #include "arpa/inet.h"
 #include "ifaddrs.h"
 #include "net/if.h"
-#include "sys/ioctl.h"
 #elif _WIN32
 #include "windows.h"
 #endif
