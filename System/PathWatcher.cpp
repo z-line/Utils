@@ -90,16 +90,15 @@ void PathWatcher::process_handle(void) {
   u8 buffer[BUFFER_LEN];
   while (!m_stop) {
     int length = read(m_fd, buffer, BUFFER_LEN);
-    LOG_I() << "";
     if (length < 0) {
-      break;
+      continue;
     }
     uint i = 0;
     while (i < length / sizeof(struct inotify_event)) {
       struct inotify_event* event = ((struct inotify_event*)buffer) + i;
       if (event->mask & IN_MODIFY) {
         auto range = m_observer_list.equal_range(m_wd_list[event->wd]);
-        for (auto it = range.first; it != range.second; ++i) {
+        for (auto it = range.first; it != range.second; ++it) {
           it->second->pathChanged(m_wd_list[event->wd]);
         }
       }
