@@ -38,7 +38,6 @@ bool PathWatcher::addPathObserver(std::string path, IPathObserver* observer) {
       return false;
     }
   }
-  m_observer_list.emplace(path, observer);
   bool found = false;
   for (auto it : m_wd_list) {
     if (it.second == path) {
@@ -49,7 +48,8 @@ bool PathWatcher::addPathObserver(std::string path, IPathObserver* observer) {
   if (!found) {
     int wd = inotify_add_watch(m_fd, path.c_str(), IN_MODIFY);
     if (wd < 0) {
-      throw std::runtime_error("watch failed");
+      LOG_E() << "Watch failed:" << path;
+      return false;
     }
     m_wd_list.emplace(wd, path);
     if (!m_thread) {
@@ -57,6 +57,7 @@ bool PathWatcher::addPathObserver(std::string path, IPathObserver* observer) {
                                  nullptr);
     }
   }
+  m_observer_list.emplace(path, observer);
   LOG_I() << "Add observer on " << path;
   return true;
 }
@@ -89,6 +90,7 @@ void PathWatcher::process_handle(void) {
   u8 buffer[BUFFER_LEN];
   while (!m_stop) {
     int length = read(m_fd, buffer, BUFFER_LEN);
+    LOG_I() << "";
     if (length < 0) {
       break;
     }
