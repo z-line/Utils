@@ -112,14 +112,6 @@ set<System::Network::Info> System::Network::getIfaceInfo(void) {
     found->second.up = ifa->ifa_flags & IFF_UP;
     // link
     found->second.link = ifa->ifa_flags & IFF_RUNNING;
-    // gateway
-    Shell::mySystem("ip route | grep default | grep " + found->second.name +
-                        " | awk '{print $3}'",
-                    found->second.gateway);
-    // mac
-    Shell::mySystem("ip link show " + found->second.name +
-                        " | grep ether | awk '{print $2}'",
-                    found->second.mac);
   }
   if (ifaddr != nullptr) {
     freeifaddrs(ifaddr);
