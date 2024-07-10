@@ -387,7 +387,6 @@ bool NetInterfaceMonitor::handle_net_link(void* nlh, bool add) {
         info.setMac(MAC((uint8_t*)RTA_DATA(attr)));
         break;
       case IFLA_IFNAME:
-        ret = true;
         info.setName(std::string((char*)RTA_DATA(attr)));
         info.setLink(ifi->ifi_flags & IFF_RUNNING);
         if (!add) {
