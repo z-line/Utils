@@ -392,7 +392,6 @@ bool NetInterfaceMonitor::handle_net_link(void* nlh, bool add) {
         if (!add) {
           auto it = m_interface_list.find(info);
           if (it != m_interface_list.end()) {
-            std::unique_lock lock(m_mutex);
             m_interface_list.erase(it);
           }
         }
@@ -408,20 +407,30 @@ bool NetInterfaceMonitor::handle_net_link(void* nlh, bool add) {
     }
   }
 
-  auto found = m_interface_list.find(info);
-  if (found == m_interface_list.end()) {
-    m_interface_list.insert(info);
+  if (add) {
+    auto found = m_interface_list.find(info);
+    if (found == m_interface_list.end()) {
+      m_interface_list.insert(info);
+    } else {
+      NetInterfaceInfo buffer;
+      buffer = *found;
+      if (info.getLink().has_value()) {
+        buffer.setLink(info.getLink().value());
+      }
+      if (info.getMac().has_value()) {
+        buffer.setMac(info.getMac().value());
+      }
+      m_interface_list.erase(found);
+      m_interface_list.emplace(buffer);
+    }
   } else {
-    NetInterfaceInfo buffer;
-    buffer = *found;
-    if (info.getLink().has_value()) {
-      buffer.setLink(info.getLink().value());
+    if (!m_observer_list.empty()) {
+      for (auto observer : m_observer_list) {
+        (*observer).linkRemove(info);
+        LOG_I() << static_cast<std::string>(info);
+      }
     }
-    if (info.getMac().has_value()) {
-      buffer.setMac(info.getMac().value());
-    }
-    m_interface_list.erase(found);
-    m_interface_list.emplace(buffer);
+    m_interface_list.erase(info);
   }
   return ret;
 }

@@ -20,7 +20,7 @@ class MAC {
     std::smatch matched;
     if (std::regex_search(mac_str, matched, pattern)) {
       for (uint8_t i = 0; i < 6; i++) {
-        m_mac[i] = std::stoul(matched[i + 1]);
+        m_mac[i] = std::stoul(matched[i + 1], 0, 16);
       }
     } else {
       LOG_E() << "Prase mac string failed";
