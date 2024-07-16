@@ -236,8 +236,7 @@ NetInterfaceMonitor::NetInterfaceMonitor() {
   struct sockaddr_nl sa;
   memset(&sa, 0, sizeof(sa));
   sa.nl_family = AF_NETLINK;
-  sa.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV4_ROUTE |
-                 RTMGRP_IPV6_IFADDR | RTMGRP_IPV6_ROUTE;
+  sa.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV4_ROUTE;
 
   while (bind(m_netlink_socket, (struct sockaddr*)&sa, sizeof(sa)) == -1 &&
          !m_force_stop) {
@@ -455,6 +454,8 @@ bool NetInterfaceMonitor::handle_net_addr(void* nlh, bool add) {
         ret = true;
         inet_ntop(ifaddr->ifa_family, RTA_DATA(attr), tmp, sizeof(tmp));
         info.addIP(std::string(tmp));
+        info.setNetmask(
+            prefixlenToNetmask(ifaddr->ifa_family, ifaddr->ifa_prefixlen));
         break;
       case IFA_LABEL:
       case IFA_LOCAL:
@@ -475,6 +476,9 @@ bool NetInterfaceMonitor::handle_net_addr(void* nlh, bool add) {
       NetInterfaceInfo buffer = *found;
       for (auto it : info.getIP()) {
         buffer.addIP(it);
+      }
+      if (info.getNetmask().has_value()) {
+        buffer.setNetmask(info.getNetmask().value().getCIDR());
       }
       m_interface_list.erase(found);
       m_interface_list.emplace(buffer);
@@ -541,9 +545,6 @@ bool NetInterfaceMonitor::handle_net_route(void* nlh, bool add) {
     }
   }
 
-  ret = true;
-  info.setNetmask(prefixlenToNetmask(rt->rtm_family, rt->rtm_dst_len));
-
   auto found = m_interface_list.find(info);
   LOG_E() << info.getName() << " " << add;
   if (add) {
@@ -553,9 +554,6 @@ bool NetInterfaceMonitor::handle_net_route(void* nlh, bool add) {
       NetInterfaceInfo buffer = *found;
       if (info.getGateway().has_value()) {
         buffer.setGateway(info.getGateway().value());
-      }
-      if (info.getNetmask().has_value()) {
-        buffer.setNetmask(info.getNetmask().value().getCIDR());
       }
       m_interface_list.erase(found);
       m_interface_list.emplace(buffer);

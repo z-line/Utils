@@ -20,6 +20,7 @@ class NetInterfaceInfo {
   const std::unordered_set<std::string>& getIP() const { return m_ip_list; }
   void addIP(std::string ip) { m_ip_list.emplace(ip); }
   void removeIP(std::string& ip) { m_ip_list.erase(ip); }
+  void clearIP() { m_ip_list.clear(); }
 
   std::optional<std::string> getGateway() const { return m_gateway; }
   void setGateway(std::string gateway) { m_gateway = gateway; }
