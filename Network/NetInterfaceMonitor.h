@@ -1,6 +1,7 @@
 #ifndef __NETINTERFACEMONITOR_H
 #define __NETINTERFACEMONITOR_H
 
+#include <filesystem>
 #include <functional>
 #include <mutex>
 #include <thread>
@@ -28,6 +29,11 @@ class NetInterfaceMonitor {
 
   void registerObserver(INetInterfaceObserver* observer) {
     m_observer_list.insert(observer);
+  }
+
+  static bool interfaceExists(const std::string& interface) {
+    std::string path = "/sys/class/net/" + interface;
+    return std::filesystem::exists(path);
   }
 
  private:
