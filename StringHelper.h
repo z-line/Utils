@@ -29,14 +29,16 @@ std::string hexToString(const std::string& hexString);
 
 template <typename T>
 std::string toString(T& value) {
-  if constexpr (std::is_same<T, std::string>::value) {
+  using decayType = typename std::decay<T>::type;
+  if constexpr (std::is_same<decayType, std::string>::value) {
     return value;
-  } else if constexpr (std::is_same<T, bool>::value) {
+  } else if constexpr (std::is_same<decayType, bool>::value) {
     return value ? "true" : "false";
-  } else if constexpr (std::is_same<T, int>::value ||
-                       std::is_same<T, double>::value) {
+  } else if constexpr (std::is_same<decayType, int>::value ||
+                       std::is_same<decayType, double>::value) {
     return std::to_string(value);
-  } else if constexpr (std::is_same<T, OrderStringUnorderedMap>::value) {
+  } else if constexpr (std::is_same<decayType,
+                                    OrderStringUnorderedMap>::value) {
     std::stringstream ss;
     ss << "[";
     for (auto item : value.order) {
@@ -55,21 +57,23 @@ std::string toString(T& value) {
 
 template <typename T>
 T fromString(std::string& str) {
-  if constexpr (std::is_same<T, std::string>::value) {
+  using decayType = typename std::decay<T>::type;
+  if constexpr (std::is_same<decayType, std::string>::value) {
     return str;
-  } else if constexpr (std::is_same<T, int>::value) {
+  } else if constexpr (std::is_same<decayType, int>::value) {
     return std::stoi(str);
-  } else if constexpr (std::is_same<T, uint>::value) {
+  } else if constexpr (std::is_same<decayType, uint>::value) {
     return std::stoul(str);
-  } else if constexpr (std::is_same<T, double>::value) {
+  } else if constexpr (std::is_same<decayType, double>::value) {
     return std::stod(str);
-  } else if constexpr (std::is_same<T, bool>::value) {
+  } else if constexpr (std::is_same<decayType, bool>::value) {
     std::transform(str.begin(), str.end(), str.begin(), tolower);
     if (str == "true") {
       return true;
     }
     return false;
-  } else if constexpr (std::is_same<T, std::vector<std::string>>::value) {
+  } else if constexpr (std::is_same<decayType,
+                                    std::vector<std::string>>::value) {
     std::vector<std::string> ret;
     if (!str.empty()) {
       if (str.find(',') == std::string::npos) {
@@ -79,7 +83,7 @@ T fromString(std::string& str) {
       }
     }
     return ret;
-  } else if constexpr (std::is_same<T, std::set<std::string>>::value) {
+  } else if constexpr (std::is_same<decayType, std::set<std::string>>::value) {
     std::set<std::string> ret;
     if (!str.empty()) {
       if (str.find(',') == std::string::npos) {
@@ -90,7 +94,8 @@ T fromString(std::string& str) {
       }
     }
     return ret;
-  } else if constexpr (std::is_same<T, OrderStringUnorderedMap>::value) {
+  } else if constexpr (std::is_same<decayType,
+                                    OrderStringUnorderedMap>::value) {
     OrderStringUnorderedMap ret;
     if (!str.empty()) {
       if (str[0] == '[' && str[str.size() - 1] == ']') {

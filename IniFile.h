@@ -32,7 +32,7 @@ class IniFile {
     return getValue(m_file_data, section, key);
   }
   void setValue(const std::string& section, const std::string& key,
-                Value& value) {
+                Value&& value) {
     std::unique_lock lock(m_mutex);
     setValue(m_file_data, section, key, value);
   }
@@ -66,8 +66,11 @@ class IniFile {
    public:
     Value() : m_value("") {}
     template <typename T>
-    Value(T&& value) : m_value(toString(value)) {}
+    Value(T&& value) : m_value(toString(std::forward<T>(value))) {}
     Value(const char* value) : m_value(value) {}
+    Value(Value&& value) noexcept : m_value(std::move(value.m_value)) {}
+    Value(const Value& other) : m_value(other.m_value) {}
+    Value(Value& other) : m_value(other.m_value) {}
 
     Value& operator=(const Value& copy) {
       m_value = copy.m_value;
@@ -162,7 +165,9 @@ class IniFile {
       out << "\n";
     }
     out.close();
+    lock.unlock();
     load(m_file_data);
+    lock.lock();
     return true;
   }
 };

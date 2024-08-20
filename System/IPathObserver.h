@@ -5,8 +5,8 @@
 
 class IPathObserver {
  public:
-  IPathObserver(){};
-  ~IPathObserver(){};
+  IPathObserver() {};
+  ~IPathObserver() {};
 
   virtual void pathChanged(const std::string& path) = 0;
 
