@@ -41,7 +41,10 @@ class Logger {
     return (*this);
   }
 
-  Logger& operator<<(bool input);
+  Logger& operator<<(bool input) {
+    m_log_output << (input ? "true" : "false");
+    return (*this);
+  }
 
  private:
   std::stringstream m_log_output;

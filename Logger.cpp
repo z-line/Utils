@@ -121,12 +121,6 @@ Logger::~Logger() {
 //       return (*this);
 //   }
 
-Logger& Logger::operator<<(bool input) {
-  static const char* BOOL_STRING[] = {"false", "true"};
-  m_log_output << BOOL_STRING[static_cast<int>(input)];
-  return (*this);
-}
-
 #else
 
 void my_log(LogLevel_TypeDef log_level, const char* const tag, const int line,
