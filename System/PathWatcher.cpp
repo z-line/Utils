@@ -16,7 +16,7 @@ PathWatcher::PathWatcher() {
 }
 
 PathWatcher::~PathWatcher() {
-  for (auto it : m_wd_list) {
+  for (const auto& it : m_wd_list) {
     inotify_rm_watch(m_fd, it.first);
   }
 
@@ -39,7 +39,7 @@ bool PathWatcher::addPathObserver(std::string path, IPathObserver* observer) {
     }
   }
   bool found = false;
-  for (auto it : m_wd_list) {
+  for (const auto& it : m_wd_list) {
     if (it.second == path) {
       found = true;
       break;
@@ -66,7 +66,7 @@ bool PathWatcher::removePathObserver(std::string path,
                                      IPathObserver* observer) {
   auto range = m_observer_list.equal_range(path);
   if (std::distance(range.first, range.second) == 1) {
-    for (auto it : m_wd_list) {
+    for (const auto& it : m_wd_list) {
       if (it.second == path) {
         m_observer_list.erase(range.first);
         inotify_rm_watch(m_fd, it.first);
