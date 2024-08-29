@@ -5,6 +5,7 @@
 #include <fstream>
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -64,7 +65,7 @@ class IniFile {
 
   class Value {
    public:
-    Value() : m_value("") {}
+    Value() {}
     template <typename T>
     Value(T&& value) : m_value(toString(std::forward<T>(value))) {}
     Value(const char* value) : m_value(value) {}
@@ -79,14 +80,16 @@ class IniFile {
 
     template <typename T>
     explicit operator T() {
-      return fromString<T>(m_value);
+      return fromString<T>(m_value.has_value() ? m_value.value() : "");
     }
 
     bool operator==(const Value& other) { return m_value == other.m_value; }
     bool operator!=(const Value& other) { return !(*this == other); }
 
+    bool hasValue() { return m_value.has_value(); }
+
    private:
-    std::string m_value;
+    std::optional<std::string> m_value;
   };
 
  private:

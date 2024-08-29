@@ -28,7 +28,7 @@ bool endsWith(const std::string& str, const std::string& substr);
 std::string hexToString(const std::string& hexString);
 
 template <typename T>
-std::string toString(T& value) {
+std::string toString(T&& value) {
   using decayType = typename std::decay<T>::type;
   if constexpr (std::is_same<decayType, std::string>::value) {
     return value;
@@ -56,7 +56,7 @@ std::string toString(T& value) {
 }
 
 template <typename T>
-T fromString(std::string& str) {
+T fromString(std::string&& str) {
   using decayType = typename std::decay<T>::type;
   if constexpr (std::is_same<decayType, std::string>::value) {
     return str;
