@@ -31,8 +31,9 @@ bool System::Shell::mySystem(string cmd) {
   }
   return err == 0;
 #elif defined(_WIN32)
-// TODO finish this
+  // TODO finish this
 #endif
+  return false;
 }
 
 bool System::Shell::mySystem(string cmd, string& ret, bool stderr2stdout) {

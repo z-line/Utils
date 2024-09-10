@@ -3,6 +3,7 @@
 
 #include <condition_variable>
 #include <functional>
+#include <string>
 #include <thread>
 
 class Timer {

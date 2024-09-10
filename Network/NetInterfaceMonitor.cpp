@@ -373,12 +373,12 @@ bool NetInterfaceMonitor::handle_net_link(void* nlh, bool add) {
   bool ret = false;
   struct nlmsghdr* msg = (struct nlmsghdr*)nlh;
   struct ifinfomsg* ifi = (struct ifinfomsg*)NLMSG_DATA(msg);
-  struct rtattr* attr = (struct rtattr*)IFLA_RTA(msg);
   int len = IFLA_PAYLOAD(msg);
 
   NetInterfaceInfo info;
 
-  for (attr = IFLA_RTA(ifi); RTA_OK(attr, len); attr = RTA_NEXT(attr, len)) {
+  for (struct rtattr* attr = IFLA_RTA(ifi); RTA_OK(attr, len);
+       attr = RTA_NEXT(attr, len)) {
     LOG_V() << "link type: " << IFLAEnumString.toString(attr->rta_type);
     switch (attr->rta_type) {
       case IFLA_ADDRESS:
