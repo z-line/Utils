@@ -646,6 +646,7 @@ void NetInterfaceMonitor::process(void) {
         }
       }
       if (refresh && !m_observer_list.empty()) {
+        std::unique_lock<std::mutex> lock(m_mutex);
         for (auto observer : m_observer_list) {
           for (auto it : m_interface_list) {
             (*observer).netChanged(it);
