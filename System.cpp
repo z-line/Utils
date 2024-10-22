@@ -20,7 +20,7 @@
 
 using namespace std;
 
-bool System::Shell::mySystem(string cmd) {
+bool System::Shell::mySystem(const string& cmd) {
 #if defined(__linux__) || defined(__APPLE__)
   int ret = system(cmd.c_str());
   int err = WEXITSTATUS(ret);
@@ -36,7 +36,8 @@ bool System::Shell::mySystem(string cmd) {
   return false;
 }
 
-bool System::Shell::mySystem(string cmd, string& ret, bool stderr2stdout) {
+bool System::Shell::mySystem(const string& cmd, string& ret,
+                             bool stderr2stdout) {
   FILE* fp = NULL;
   char data[100] = {'0'};
   fp = popen((cmd + (stderr2stdout ? " 2>&1" : "")).c_str(), "r");
@@ -59,6 +60,7 @@ string System::Path::getAppPath(void) {
   ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer));
   if (len == -1) {
     perror("readlink");
+    return "";
   }
 #elif defined(_WIN32)
   GetCurrentDirectoryA(sizeof(buffer), buffer);
@@ -71,7 +73,7 @@ string System::Path::getAppDir(void) {
   return appPath.substr(0, appPath.find_last_of('/'));
 }
 
-bool System::Path::exist(string path) {
+bool System::Path::exist(const string& path) {
   if (access(path.c_str(), F_OK) == 0) {
     return true;
   }
@@ -161,7 +163,7 @@ set<string> System::Network::getIFList(void) {
   return ret;
 }
 
-string System::Network::getIP(IPType type, string iface) {
+string System::Network::getIP(IPType type, const string& iface) {
   string ret = "";
 #if defined(__linux__) || defined(__APPLE__)
   struct ifaddrs* ifaddr = nullptr;

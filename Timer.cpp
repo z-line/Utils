@@ -4,8 +4,8 @@
 
 #include "Logger.h"
 
-Timer::Timer(std::string name, bool start_immediate,
-             std::function<void(void)> handle, int interval)
+Timer::Timer(const std::string& name, bool start_immediate,
+             const std::function<void(void)>& handle, int interval)
     : m_name(name), m_interval(interval), m_handle(handle) {
   if (start_immediate) {
     start();

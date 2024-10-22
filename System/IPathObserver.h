@@ -5,7 +5,12 @@
 
 class IPathObserver {
  public:
-  virtual ~IPathObserver() {};
+  IPathObserver() = default;
+  IPathObserver(const IPathObserver&) = delete;
+
+  virtual ~IPathObserver(){};
+
+  IPathObserver& operator=(const IPathObserver&) = delete;
 
   virtual void pathChanged(const std::string& path) = 0;
 

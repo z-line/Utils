@@ -101,7 +101,7 @@ T fromString(std::string&& str) {
       if (str[0] == '[' && str[str.size() - 1] == ']') {
         std::vector<std::string> array_item =
             split(str.substr(1, str.size() - 2), ',');
-        for (auto item : array_item) {
+        for (const auto& item : array_item) {
           std::vector<std::string> sub_str = split(item, ':');
           if (sub_str.size() != 2) {
             LOG_I() << "Wrong map: " << item;

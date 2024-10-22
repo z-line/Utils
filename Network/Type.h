@@ -14,7 +14,7 @@ namespace Network {
 class MAC {
  public:
   MAC(uint8_t* data) { memcpy(m_mac, data, 6); }
-  MAC(std::string mac_str) {
+  MAC(const std::string &mac_str) {
     std::regex pattern(
         R"(^([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2})$)");
     std::smatch matched;
@@ -47,7 +47,7 @@ class MAC {
 class Netmask {
  public:
   Netmask(uint8_t cidr) : m_cidr(cidr) {}
-  Netmask(std::string netmask) {
+  Netmask(const std::string &netmask) {
     std::regex pattern(R"(^(\d+)\.(\d+)\.(\d+)\.(\d+)$)");
     std::smatch matched;
     int cidr = 0;

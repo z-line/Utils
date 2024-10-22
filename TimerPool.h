@@ -12,12 +12,12 @@
 
 class TimerPool {
  public:
-  TimerPool(std::string name);
+  TimerPool(const std::string& name);
   ~TimerPool();
 
   void start();
   void stop();
-  void addItem(std::function<void(void)> handle, bool repeat, bool immediate,
+  void addItem(const std::function<void(void)>& handle, bool repeat, bool immediate,
                std::chrono::milliseconds interval);
 
  private:

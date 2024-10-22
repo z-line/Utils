@@ -7,7 +7,12 @@ namespace Network {
 
 class INetInterfaceObserver {
  public:
+  INetInterfaceObserver() = default;
+  INetInterfaceObserver(const INetInterfaceObserver&) = delete;
+
   virtual ~INetInterfaceObserver() {}
+
+  INetInterfaceObserver& operator=(const INetInterfaceObserver&) = delete;
 
   virtual void linkRemove(const NetInterfaceInfo& removed_interface) = 0;
   virtual void netChanged(const NetInterfaceInfo& changed_interface) = 0;

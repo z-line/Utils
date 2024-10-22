@@ -4,7 +4,7 @@
 
 using namespace std;
 
-TimerPool::TimerPool(string name) : m_name(name) { start(); }
+TimerPool::TimerPool(const string& name) : m_name(name) { start(); }
 
 TimerPool::~TimerPool() { stop(); }
 
@@ -22,7 +22,7 @@ void TimerPool::stop() {
   m_thread->join();
 }
 
-void TimerPool::addItem(function<void(void)> handle, bool repeat,
+void TimerPool::addItem(const function<void(void)>& handle, bool repeat,
                         bool immediate, chrono::milliseconds interval) {
   Item item = {.repeat = repeat,
                .handle = handle,

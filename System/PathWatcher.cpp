@@ -30,7 +30,7 @@ PathWatcher::~PathWatcher() {
   LOG_I() << "Destroy PathWatcher ";
 }
 
-bool PathWatcher::addPathObserver(std::string path, IPathObserver* observer) {
+bool PathWatcher::addPathObserver(const std::string& path, IPathObserver* observer) {
   auto range = m_observer_list.equal_range(path);
   for (auto it = range.first; it != range.second; ++it) {
     if (it->second == observer) {
@@ -62,7 +62,7 @@ bool PathWatcher::addPathObserver(std::string path, IPathObserver* observer) {
   return true;
 }
 
-bool PathWatcher::removePathObserver(std::string path,
+bool PathWatcher::removePathObserver(const std::string& path,
                                      IPathObserver* observer) {
   auto range = m_observer_list.equal_range(path);
   if (std::distance(range.first, range.second) == 1) {

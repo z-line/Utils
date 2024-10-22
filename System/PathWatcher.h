@@ -13,8 +13,11 @@ class PathWatcher {
   PathWatcher();
   ~PathWatcher();
 
-  bool addPathObserver(std::string path, IPathObserver* observer);
-  bool removePathObserver(std::string path, IPathObserver* observer);
+  PathWatcher(const PathWatcher&) = delete;
+  PathWatcher& operator=(const PathWatcher&) = delete;
+
+  bool addPathObserver(const std::string& path, IPathObserver* observer);
+  bool removePathObserver(const std::string& path, IPathObserver* observer);
 
  private:
   int m_fd = -1;

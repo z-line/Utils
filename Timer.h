@@ -8,7 +8,7 @@
 
 class Timer {
  public:
-  Timer(std::string name, bool start, std::function<void(void)> handle,
+  Timer(const std::string& name, bool start, const std::function<void(void)>& handle,
         int interval = 1000);
   ~Timer();
 

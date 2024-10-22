@@ -22,7 +22,7 @@ class IniFile {
   using IniData =
       std::unordered_map<std::string, std::unordered_map<std::string, Value>>;
 
-  IniFile(std::string path) : m_path(path) {}
+  IniFile(const std::string& path) : m_path(path) {}
   ~IniFile() {}
 
   bool load() { return load(m_file_data); }
@@ -140,7 +140,8 @@ class IniFile {
 
   class Value {
    public:
-    Value() {}
+    Value() = default;
+    ~Value() = default;
     template <typename T>
     Value(T&& value) : m_value(toString(std::forward<T>(value))) {}
     Value(const char* value) : m_value(value) {}

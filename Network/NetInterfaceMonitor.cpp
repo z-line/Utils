@@ -474,7 +474,7 @@ bool NetInterfaceMonitor::handle_net_addr(void* nlh, bool add) {
       m_interface_list.emplace(info);
     } else {
       NetInterfaceInfo buffer = *found;
-      for (auto it : info.getIP()) {
+      for (const auto& it : info.getIP()) {
         buffer.addIP(it);
       }
       if (info.getNetmask().has_value()) {
@@ -486,7 +486,7 @@ bool NetInterfaceMonitor::handle_net_addr(void* nlh, bool add) {
   } else {
     if (found != m_interface_list.end()) {
       NetInterfaceInfo buffer = *found;
-      for (auto it : info.getIP()) {
+      for (const auto& it : info.getIP()) {
         buffer.removeIP(it);
       }
       m_interface_list.erase(found);
@@ -648,7 +648,7 @@ void NetInterfaceMonitor::process(void) {
       if (refresh && !m_observer_list.empty()) {
         std::unique_lock<std::mutex> lock(m_mutex);
         for (auto observer : m_observer_list) {
-          for (auto it : m_interface_list) {
+          for (const auto& it : m_interface_list) {
             (*observer).netChanged(it);
             LOG_I() << static_cast<std::string>(it);
           }

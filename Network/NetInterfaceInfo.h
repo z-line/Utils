@@ -15,7 +15,7 @@ class NetInterfaceInfo {
   ~NetInterfaceInfo() {}
 
   const std::string& getName() const { return m_name; }
-  void setName(std::string name) { m_name = name; }
+  void setName(const std::string& name) { m_name = name; }
 
   const std::unordered_set<std::string>& getIP() const { return m_ip_list; }
   void addIP(std::string ip) { m_ip_list.emplace(ip); }
@@ -23,7 +23,7 @@ class NetInterfaceInfo {
   void clearIP() { m_ip_list.clear(); }
 
   std::optional<std::string> getGateway() const { return m_gateway; }
-  void setGateway(std::string gateway) { m_gateway = gateway; }
+  void setGateway(const std::string& gateway) { m_gateway = gateway; }
 
   std::optional<MAC> getMac() const { return m_mac; }
   void setMac(MAC mac) { m_mac = mac; }
@@ -54,7 +54,7 @@ class NetInterfaceInfo {
         << (m_netmask.has_value() ? static_cast<std::string>(m_netmask.value())
                                   : "");
     ret << " ip ";
-    for (auto it : m_ip_list) {
+    for (const auto& it : m_ip_list) {
       ret << it << " ";
     }
     return ret.str();

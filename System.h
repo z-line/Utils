@@ -10,8 +10,8 @@ namespace System {
 
 namespace Shell {
 
-bool mySystem(std::string cmd);
-bool mySystem(std::string cmd, std::string& ret, bool stderr2stdout = true);
+bool mySystem(const std::string& cmd);
+bool mySystem(const std::string& cmd, std::string& ret, bool stderr2stdout = true);
 
 }  // namespace Shell
 namespace Network {
@@ -32,14 +32,14 @@ enum class IPType { IPv4, IPv6 };
 
 std::set<Info> getIfaceInfo(void);
 std::set<std::string> getIFList(void);
-std::string getIP(IPType type, std::string iface);
+std::string getIP(IPType type, const std::string& iface);
 
 }  // namespace Network
 namespace Path {
 
 std::string getAppPath(void);
 std::string getAppDir(void);
-bool exist(std::string path);
+bool exist(const std::string& path);
 
 }  // namespace Path
 
