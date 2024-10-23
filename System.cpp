@@ -55,12 +55,12 @@ bool System::Shell::mySystem(const string& cmd, string& ret,
 }
 
 string System::Path::getAppPath(void) {
-  char buffer[512];
+  char buffer[512] = {0};
 #if defined(__linux__) || defined(__APPLE__)
   ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer));
   if (len == -1) {
     perror("readlink");
-    return "";
+    buffer[0] = 0;
   }
 #elif defined(_WIN32)
   GetCurrentDirectoryA(sizeof(buffer), buffer);
