@@ -39,16 +39,17 @@ bool System::Shell::mySystem(const string& cmd) {
 bool System::Shell::mySystem(const string& cmd, string& ret,
                              bool stderr2stdout) {
   FILE* fp = NULL;
-  char data[100] = {'0'};
+  char data[100] = {0};
   fp = popen((cmd + (stderr2stdout ? " 2>&1" : "")).c_str(), "r");
   if (fp == NULL) {
     LOG_E() << "popen error!";
     return false;
   }
-  ret.clear();
+  stringstream ss;
   while (fgets(data, sizeof(data), fp) != NULL) {
-    ret += string(data);
+    ss << data;
   }
+  ret = ss.str();
   pclose(fp);
   LOG_V() << "exec: [" << cmd << "] ret: " << ret;
   return true;

@@ -13,7 +13,7 @@
 namespace Network {
 class MAC {
  public:
-  MAC(uint8_t* data) { memcpy(m_mac, data, 6); }
+  MAC(uint8_t *data) { memcpy(m_mac, data, 6); }
   MAC(const std::string &mac_str) {
     std::regex pattern(
         R"(^([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2})$)");
@@ -51,9 +51,9 @@ class Netmask {
     std::regex pattern(R"(^(\d+)\.(\d+)\.(\d+)\.(\d+)$)");
     std::smatch matched;
     int cidr = 0;
-    if (std::regex_search(netmask, matched, pattern)) {
-      for (int i = 0; i < 4; i++) {
-        int num = std::stoi(matched[i + 1]);
+    if (std::regex_search(netmask, matched, pattern) && matched.size() == 5) {
+      for (int i = 1; i < 5; i++) {
+        int num = std::stoi(matched[i]);
         cidr += std::bitset<8>(num).count();
       }
     } else {

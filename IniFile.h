@@ -22,8 +22,8 @@ class IniFile {
   using IniData =
       std::unordered_map<std::string, std::unordered_map<std::string, Value>>;
 
-  IniFile(const std::string& path) : m_path(path) {}
-  ~IniFile() {}
+  IniFile(const std::string& path) : m_path(path){};
+  ~IniFile() = default;
 
   bool load() { return load(m_file_data); }
   bool save() { return save(m_file_data); }
@@ -54,10 +54,11 @@ class IniFile {
         // Comment
       } else if (line[0] == '[') {
         // Section
-        if (line[line.size() - 1u] == ']' ||
-            (line[line.size() - 2u] == ']' && line[line.size() - 1u] == '\r')) {
-          section = line.substr(
-              1u, line.size() - (line[line.size() - 1u] == ']' ? 2u : 3u));
+        size_t end_pos = line.find_last_of(']');
+        if (end_pos != std::string::npos && end_pos > 1 &&
+            (end_pos == line.size() - 1u ||
+             (end_pos == line.size() - 2u && line[line.size() - 1u] == '\r'))) {
+          section = line.substr(1, end_pos - 1);
           auto it = data_buffer.find(section);
           if (it == data_buffer.end()) {
             data_buffer[section] = std::unordered_map<std::string, Value>();
@@ -131,7 +132,7 @@ class IniFile {
     auto found_section = source.find(section);
     if (found_section != source.end()) {
       std::unordered_map<std::string, Value>& section_ref = source.at(section);
-      section_ref[key] = value;
+      section_ref.insert_or_assign(key, value);
     } else {
       std::unordered_map<std::string, Value> buffer = {{key, value}};
       source.insert_or_assign(section, buffer);
@@ -143,16 +144,11 @@ class IniFile {
     Value() = default;
     ~Value() = default;
     template <typename T>
-    Value(T&& value) : m_value(toString(std::forward<T>(value))) {}
+    Value(const T& value) : m_value(toString(value)) {}
     Value(const char* value) : m_value(value) {}
-    Value(Value&& value) noexcept : m_value(std::move(value.m_value)) {}
-    Value(const Value& other) : m_value(other.m_value) {}
-    Value(Value& other) : m_value(other.m_value) {}
+    Value(const Value& other) = default;
 
-    Value& operator=(const Value& copy) {
-      m_value = copy.m_value;
-      return *this;
-    }
+    Value& operator=(const Value& copy) = default;
 
     template <typename T>
     explicit operator T() {
