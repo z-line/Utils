@@ -2,6 +2,7 @@
 #define __STRINGHELPER_H
 
 #include <algorithm>
+#include <cctype>
 #include <set>
 #include <sstream>
 #include <string>
@@ -28,18 +29,21 @@ bool endsWith(const std::string& str, const std::string& substr);
 std::string hexToString(const std::string& hexString);
 
 template <typename T>
-std::string toString(T&& value) {
+std::string toString(const T& value) {
   using decayType = typename std::decay<T>::type;
   if constexpr (std::is_same<decayType, std::string>::value) {
     return value;
+  } else if constexpr (std::is_same<decayType, char*>::value) {
+    return std::string(value);
   } else if constexpr (std::is_same<decayType, bool>::value) {
     return value ? "true" : "false";
   } else if constexpr (std::is_same<decayType, int>::value ||
-                       std::is_same<decayType, double>::value) {
+                       std::is_same<decayType, double>::value ||
+                       std::is_same<decayType, unsigned long>::value) {
     return std::to_string(value);
   } else if constexpr (std::is_same<decayType,
                                     OrderStringUnorderedMap>::value) {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "[";
     for (auto item : value.order) {
       auto found = value.map.find(item);
@@ -48,26 +52,40 @@ std::string toString(T&& value) {
       }
     }
     ss << "]";
+    return ss.str();
   } else {
-    throw std::runtime_error("Requested unknown datatype " +
-                             std::string(__FUNCTION__) + " " +
-                             std::string(typeid(T).name()));
+    static_assert(!std::is_same<T, T>::value, "Unsupported type");
   }
 }
 
 template <typename T>
-T fromString(std::string&& str) {
+T fromString(const std::string& str) {
   using decayType = typename std::decay<T>::type;
   if constexpr (std::is_same<decayType, std::string>::value) {
     return str;
   } else if constexpr (std::is_same<decayType, int>::value) {
-    return std::stoi(str);
-  } else if constexpr (std::is_same<decayType, uint>::value) {
-    return std::stoul(str);
+    try {
+      return std::stoi(str);
+    } catch (const std::exception& e) {
+      throw std::runtime_error("Invalid integer: " + str);
+    }
+  } else if constexpr (std::is_same<decayType, unsigned long>::value ||
+                       std::is_same<decayType, unsigned int>::value) {
+    try {
+      return std::stoul(str);
+    } catch (const std::exception& e) {
+      throw std::runtime_error("Invalid unsigned long: " + str);
+    }
   } else if constexpr (std::is_same<decayType, double>::value) {
-    return std::stod(str);
+    try {
+      return std::stod(str);
+    } catch (const std::exception& e) {
+      throw std::runtime_error("Invalid double: " + str);
+    }
   } else if constexpr (std::is_same<decayType, bool>::value) {
-    std::transform(str.begin(), str.end(), str.begin(), tolower);
+    std::string copy = str;
+    std::transform(copy.begin(), copy.end(), copy.begin(),
+                   [](char c) { return std::tolower(c); });
     if (str == "true") {
       return true;
     }
@@ -97,7 +115,7 @@ T fromString(std::string&& str) {
   } else if constexpr (std::is_same<decayType,
                                     OrderStringUnorderedMap>::value) {
     OrderStringUnorderedMap ret;
-    if (!str.empty()) {
+    if (!str.empty() && str.size() >= 2) {
       if (str[0] == '[' && str[str.size() - 1] == ']') {
         std::vector<std::string> array_item =
             split(str.substr(1, str.size() - 2), ',');
@@ -116,9 +134,7 @@ T fromString(std::string&& str) {
     }
     return ret;
   } else {
-    throw std::runtime_error("Requested unknown datatype " +
-                             std::string(__FUNCTION__) + " " +
-                             std::string(typeid(T).name()));
+    static_assert(!std::is_same<T, T>::value, "Unsupported type");
   }
 }
 
