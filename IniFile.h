@@ -33,7 +33,7 @@ class IniFile {
     return getValue(m_file_data, section, key);
   }
   void setValue(const std::string& section, const std::string& key,
-                Value&& value) {
+                const Value& value) {
     std::unique_lock lock(m_mutex);
     setValue(m_file_data, section, key, value);
   }
