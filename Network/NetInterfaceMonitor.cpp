@@ -224,7 +224,7 @@ NetInterfaceMonitor::NetInterfaceMonitor() {
   } while (m_netlink_socket == -1 && !m_force_stop);
 
   retry = 0;
-  struct timeval timeout = {.tv_sec = 0, .tv_usec = 500 * 1000};
+  struct timeval timeout = {.tv_sec = 0, .tv_usec = 200 * 1000};
 
   while (setsockopt(m_netlink_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout,
                     sizeof(timeout)) < 0 &&
