@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <map>
+#include <mutex>
 #include <string>
 #include <thread>
 
@@ -20,6 +21,7 @@ class PathWatcher {
   bool removePathObserver(const std::string& path, IPathObserver* observer);
 
  private:
+  std::mutex m_mutex;
   int m_fd = -1;
 
   std::multimap<std::string, IPathObserver*> m_observer_list;

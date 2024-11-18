@@ -30,7 +30,9 @@ PathWatcher::~PathWatcher() {
   LOG_I() << "Destroy PathWatcher ";
 }
 
-bool PathWatcher::addPathObserver(const std::string& path, IPathObserver* observer) {
+bool PathWatcher::addPathObserver(const std::string& path,
+                                  IPathObserver* observer) {
+  std::unique_lock lock(m_mutex);
   auto range = m_observer_list.equal_range(path);
   for (auto it = range.first; it != range.second; ++it) {
     if (it->second == observer) {
@@ -64,6 +66,7 @@ bool PathWatcher::addPathObserver(const std::string& path, IPathObserver* observ
 
 bool PathWatcher::removePathObserver(const std::string& path,
                                      IPathObserver* observer) {
+  std::unique_lock lock(m_mutex);
   auto range = m_observer_list.equal_range(path);
   if (std::distance(range.first, range.second) == 1) {
     for (const auto& it : m_wd_list) {
@@ -97,6 +100,7 @@ void PathWatcher::process_handle(void) {
     while (i < length / sizeof(struct inotify_event)) {
       struct inotify_event* event = ((struct inotify_event*)buffer) + i;
       if (event->mask & IN_MODIFY) {
+        std::unique_lock lock(m_mutex);
         auto range = m_observer_list.equal_range(m_wd_list[event->wd]);
         for (auto it = range.first; it != range.second; ++it) {
           it->second->pathChanged(m_wd_list[event->wd]);
