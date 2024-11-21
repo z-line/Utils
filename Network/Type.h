@@ -1,10 +1,10 @@
 #ifndef __TYPE_H
 #define __TYPE_H
 
+#include <QRegularExpression>
 #include <bitset>
 #include <cstring>
 #include <iomanip>
-#include <regex>
 #include <sstream>
 #include <string>
 
@@ -15,12 +15,11 @@ class MAC {
  public:
   MAC(uint8_t *data) { memcpy(m_mac, data, 6); }
   MAC(const std::string &mac_str) {
-    std::regex pattern(
-        R"(^([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2})$)");
-    std::smatch matched;
-    if (std::regex_search(mac_str, matched, pattern)) {
+    QRegularExpressionMatch matched =
+        m_pattern.match(QString::fromStdString(mac_str));
+    if (matched.hasMatch()) {
       for (uint8_t i = 0; i < 6; i++) {
-        m_mac[i] = std::stoul(matched[i + 1], 0, 16);
+        m_mac[i] = std::stoul(matched.captured(i + 1).toStdString(), 0, 16);
       }
     } else {
       LOG_E() << "Prase mac string failed";
@@ -41,6 +40,9 @@ class MAC {
   }
 
  private:
+  static inline const QRegularExpression m_pattern{
+      "(^([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{"
+      "0,2}):([0-9a-fA-F]{0,2}):([0-9a-fA-F]{0,2})$)"};
   uint8_t m_mac[6];
 };
 
@@ -48,12 +50,12 @@ class Netmask {
  public:
   Netmask(uint8_t cidr) : m_cidr(cidr) {}
   Netmask(const std::string &netmask) {
-    std::regex pattern(R"(^(\d+)\.(\d+)\.(\d+)\.(\d+)$)");
-    std::smatch matched;
+    QRegularExpressionMatch matched =
+        m_pattern.match(QString::fromStdString(netmask));
     int cidr = 0;
-    if (std::regex_search(netmask, matched, pattern) && matched.size() == 5) {
+    if (matched.hasMatch() && matched.capturedLength() == 5) {
       for (int i = 1; i < 5; i++) {
-        int num = std::stoi(matched[i]);
+        int num = std::stoi(matched.captured(i).toStdString());
         cidr += std::bitset<8>(num).count();
       }
     } else {
@@ -85,6 +87,8 @@ class Netmask {
   }
 
  private:
+  static inline const QRegularExpression m_pattern{
+      R"(^(\d+)\.(\d+)\.(\d+)\.(\d+)$)"};
   uint8_t m_cidr;
 };
 }  // namespace Network

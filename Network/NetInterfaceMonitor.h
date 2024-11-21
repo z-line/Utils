@@ -28,7 +28,13 @@ class NetInterfaceMonitor {
   }
 
   void registerObserver(INetInterfaceObserver* observer) {
+    std::unique_lock lock(m_mutex);
     m_observer_list.insert(observer);
+  }
+
+  void unregisterObserver(INetInterfaceObserver* observer) {
+    std::unique_lock lock(m_mutex);
+    m_observer_list.erase(observer);
   }
 
   static bool interfaceExists(const std::string& interface) {
