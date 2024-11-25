@@ -379,7 +379,6 @@ bool NetInterfaceMonitor::handle_net_link(void* nlh, bool add) {
 
   for (struct rtattr* attr = IFLA_RTA(ifi); RTA_OK(attr, len);
        attr = RTA_NEXT(attr, len)) {
-    LOG_V() << "link type: " << IFLAEnumString.toString(attr->rta_type);
     switch (attr->rta_type) {
       case IFLA_ADDRESS:
         ret = true;
@@ -448,7 +447,6 @@ bool NetInterfaceMonitor::handle_net_addr(void* nlh, bool add) {
   info.setName(ifindexToName(ifaddr->ifa_index));
 
   for (; RTA_OK(attr, rtl); attr = RTA_NEXT(attr, rtl)) {
-    LOG_V() << "addr " << IFAEnumString.toString(attr->rta_type);
     switch (attr->rta_type) {
       case IFA_ADDRESS:
         ret = true;
@@ -508,7 +506,6 @@ bool NetInterfaceMonitor::handle_net_route(void* nlh, bool add) {
   NetInterfaceInfo info;
 
   for (; RTA_OK(attr, len); attr = RTA_NEXT(attr, len)) {
-    LOG_V() << "route " << RTAEnumString.toString(attr->rta_type);
     switch (attr->rta_type) {
       case RTA_GATEWAY:
         ret = true;
@@ -546,7 +543,6 @@ bool NetInterfaceMonitor::handle_net_route(void* nlh, bool add) {
   }
 
   auto found = m_interface_list.find(info);
-  LOG_E() << info.getName() << " " << add;
   if (add) {
     if (found == m_interface_list.end()) {
       m_interface_list.emplace(info);
@@ -566,7 +562,6 @@ bool NetInterfaceMonitor::handle_net_route(void* nlh, bool add) {
       m_interface_list.emplace(buffer);
     }
   }
-  LOG_E() << info.getName() << "quit";
 
   return ret;
 }
@@ -605,9 +600,6 @@ void NetInterfaceMonitor::process(void) {
       bool refresh = false;
       for (nlh = (struct nlmsghdr*)buffer; NLMSG_OK(nlh, len);
            nlh = NLMSG_NEXT(nlh, len)) {
-        LOG_I() << "netlink event:"
-                << RTMessageEnumString.toString(nlh->nlmsg_type) << " - "
-                << nlh->nlmsg_type;
         switch (nlh->nlmsg_type) {
           case NLMSG_DONE:
             break;
@@ -650,7 +642,6 @@ void NetInterfaceMonitor::process(void) {
         for (auto observer : m_observer_list) {
           for (const auto& it : m_interface_list) {
             (*observer).netChanged(it);
-            LOG_I() << static_cast<std::string>(it);
           }
         }
       }
